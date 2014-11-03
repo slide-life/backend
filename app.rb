@@ -6,7 +6,6 @@ require 'mongo'
 CLIENT = Mongo::MongoClient.new('ds047800.mongolab.com', 47800)
 DB = CLIENT['slide']
 DB.authenticate('admin', 'slideinslideoutslideup')
-BUCKETS = DB.create_collection('buckets')
 
 # Declare models
 class Model
@@ -18,6 +17,9 @@ class Model
   def to_json
     to_hash.to_json
   end
+  def collection
+    self.class.collection
+  end
   def self.from_hash(hash)
     bucket = self.allocate
     hash.each { |name, value|
@@ -26,20 +28,24 @@ class Model
     bucket
   end
   def self.get(id)
-    BUCKETS.find().to_a.map {|x|
+    self.collection.find().to_a.map {|x|
       self.from_hash x
     }
   end
   def create!
-    BUCKETS.insert(to_hash)
+    self.collection.insert(to_hash)
   end
   def update!
     x = to_hash
-    BUCKETS.update({ "_id" => x["_id"] }, x)
+    self.collection.update({ "_id" => x["_id"] }, x)
   end
 end
 
+Buckets = DB.create_collection('buckets')
 class Bucket < Model
+  def self.collection
+    Buckets
+  end
   def initialize(key)
     @key = key
   end
