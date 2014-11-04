@@ -2,6 +2,8 @@ require 'sinatra'
 require 'sinatra-websocket'
 require 'json'
 require 'mongo'
+require 'logger'
+require 'houston'
 require 'sinatra/cross_origin'
 
 configure do
@@ -9,6 +11,7 @@ configure do
   set :allow_origin, :any
   set :allow_methods, [:get, :post, :options, :put]
 end
+
 options "*" do
   response.headers["Allow"] = "HEAD,GET,PUT,DELETE,OPTIONS"
   response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
@@ -16,7 +19,7 @@ options "*" do
 end
 
 # Connect to the database
-CLIENT = Mongo::MongoClient.new('ds047800.mongolab.com', 47800)
+CLIENT = Mongo::MongoClient.new('ds047800.mongolab.com', 47800, :logger => Logger.new(STDOUT))
 DB = CLIENT['slide']
 DB.authenticate('admin', 'slideinslideoutslideup')
 
