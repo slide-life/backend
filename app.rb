@@ -35,6 +35,13 @@ class Model
       x[0].start_with? "__"
     }]
   end
+  attr_accessor :id
+  def id
+    @_id
+  end
+  def id=(id)
+    @_id = id
+  end
   def to_json
     to_hash.to_json
   end
@@ -43,17 +50,16 @@ class Model
   end
   def self.from_hash(hash)
     bucket = self.allocate
-    hash.each { |name, value|
+    hash.each do |name, value|
       bucket.instance_variable_set("@#{name}", value)
-    }
+    end
     bucket
   end
   def create!
     self.collection.insert(to_hash)
   end
   def update!
-    x = to_hash
-    self.collection.update({ "_id" => x["_id"] }, x)
+    self.collection.update({ "_id" => id }, to_hash)
   end
   def self.find_by_id(id)
     self.find_one({ "_id" => BSON::ObjectId(id) })
@@ -62,15 +68,16 @@ class Model
     self.from_hash self.collection.find_one(*args)
   end
   def self.find(*args)
-    self.collection.find(*args).to_a.map {|x|
-      self.from_hash x
-    }
+    self.collection.find(*args).to_a.map do |item|
+      self.from_hash item
+    end
   end
 end
 
 Sockets = {}
 Buckets = DB.create_collection('buckets')
 class Bucket < Model
+  attr_accessor :fields
   def self.collection
     Buckets
   end
@@ -94,6 +101,7 @@ end
 
 Fields = DB.create_collection('fields')
 class Field < Model
+  attr_accessor :name
   def self.collection
     Fields
   end
@@ -101,15 +109,19 @@ end
 
 Users = DB.create_collection('users')
 class User < Model
+  attr_accessor :username, :devices
   def self.collection
     Users
+  end
+  def initialize()
+    @devices = []
   end
 end
 
 before do
   content_type :json
   request.body.rewind
-  @request_payload = JSON.parse request.body.read
+  @request_payload = JSON.parse request.body.read unless request.body.length == 0
 end
 
 class InvalidFieldError < StandardError
@@ -131,13 +143,13 @@ post '/buckets' do
 
   validated_fields = Field.find({ name: { '$in' => fields } })
   unless fields.length == validated_fields.length
-    invalid_fields = fields - validated_fields.map { |field| field['name'] }
+    invalid_fields = fields - validated_fields.map { |field| field.name }
     halt 400, "The field(s) #{invalid_fields.join(' ,')} are invalid"
   end
 
   # TODO: use user-specific encryption key
   # TODO: use field ids
-  bucket = Bucket.new(1234, validated_fields.map { |field| field['_id'] })
+  bucket = Bucket.new(1234, validated_fields.map { |field| field.id })
   bucket.create!
   bucket.to_json
 end
@@ -149,16 +161,28 @@ put '/buckets/:id' do
   bucket.to_json
 end
 
-put '/buckets/:id/notify' do
+put '/users/:id/add_device' do
+  user = User.find_by_id(params[:id])
+  halt 404, 'User does not exist' unless user
+
+  user.devices << @request_payload['device']
+  user.update!
+  user.to_json
+end
+
+put '/buckets/:id/request_content' do
   user = User.find_one({ username: @request_payload['user'] })
-  halt 400, 'User does not exist' unless user
-  halt 400, 'User does not have a device registered' unless user['token']
+  halt 404, 'User does not exist' unless user
+  halt 400, 'User does not have a device registered' if user.devices.empty?
  
   bucket = Bucket.find_by_id(params[:id])
-  notification = Houston::Notification.new(device: user['token'])
-  notification.alert = 'Hello, World!'
-  notification.custom_data = { fields: bucket['fields'] }
-  APN.push(notification)
+  # TODO: make async
+  user.devices.each do |token|
+    notification = Houston::Notification.new(device: user.token)
+    notification.alert = 'Hello, World!'
+    notification.custom_data = { fields: bucket.fields }
+    APN.push(notification)
+  end
 end
 
 get '/buckets/:id' do
