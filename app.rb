@@ -6,6 +6,9 @@ require 'logger'
 require 'houston'
 require 'sinatra/cross_origin'
 
+APN = Houston::Client.development
+APN.certificate = File.read("#{Dir.pwd}/pushcert.pem")
+
 configure do
   enable :cross_origin
   set :allow_origin, :any
@@ -45,11 +48,6 @@ class Model
     }
     bucket
   end
-  def self.get(id)
-    self.collection.find({ "_id" => BSON::ObjectId(id) }).to_a.map {|x|
-      self.from_hash x
-    }
-  end
   def create!
     self.collection.insert(to_hash)
   end
@@ -57,16 +55,28 @@ class Model
     x = to_hash
     self.collection.update({ "_id" => x["_id"] }, x)
   end
+  def self.find_by_id(id)
+    self.find_one({ "_id" => BSON::ObjectId(id) })
+  end
+  def self.find_one(*args)
+    self.from_hash self.collection.find_one(*args)
+  end
+  def self.find(*args)
+    self.collection.find(*args).to_a.map {|x|
+      self.from_hash x
+    }
+  end
 end
 
-Buckets = DB.create_collection('buckets')
 Sockets = {}
+Buckets = DB.create_collection('buckets')
 class Bucket < Model
   def self.collection
     Buckets
   end
-  def initialize(key)
+  def initialize(key, fields)
     @key = key
+    @fields = fields
     @__socket = nil
     @id = create!.to_s
   end
@@ -82,29 +92,84 @@ class Bucket < Model
   end
 end
 
-# Declare routes
-post '/buckets' do
+Fields = DB.create_collection('fields')
+class Field < Model
+  def self.collection
+    Fields
+  end
+end
+
+Users = DB.create_collection('users')
+class User < Model
+  def self.collection
+    Users
+  end
+end
+
+before do
   content_type :json
+  request.body.rewind
+  @request_payload = JSON.parse request.body.read
+end
+
+class InvalidFieldError < StandardError
+end
+
+# Declare routes
+
+post '/buckets' do
+  fields = @request_payload
+
+  if fields.length == 0
+    halt 400, 'You cannot create a bucket with no fields'
+  end
+
+  duplicate_fields = fields.select { |field| fields.count(field) > 1 }.uniq
+  if duplicate_fields.length > 0
+    halt 400, "You cannot create a bucket with duplicate fields. You have included #{duplicate_fields.join(' ,')} twice"
+  end
+
+  validated_fields = Field.find({ name: { '$in' => fields } })
+  unless fields.length == validated_fields.length
+    invalid_fields = fields - validated_fields.map { |field| field['name'] }
+    halt 400, "The field(s) #{invalid_fields.join(' ,')} are invalid"
+  end
+
   # TODO: use user-specific encryption key
-  bucket = Bucket.new(1234)
+  # TODO: use field ids
+  bucket = Bucket.new(1234, validated_fields.map { |field| field['_id'] })
   bucket.create!
   bucket.to_json
 end
+
 put '/buckets/:id' do
-  content_type :json
-  bucket = Bucket.get(params[:id])[0]
+  bucket = Bucket.find_by_id(params[:id])
   bucket.populate request.body.read
   bucket.update!
   bucket.to_json
 end
-get '/buckets/:id' do
-  Bucket.get(params[:id])[0].to_json
+
+put '/buckets/:id/notify' do
+  user = User.find_one({ username: @request_payload['user'] })
+  halt 400, 'User does not exist' unless user
+  halt 400, 'User does not have a device registered' unless user['token']
+ 
+  bucket = Bucket.find_by_id(params[:id])
+  notification = Houston::Notification.new(device: user['token'])
+  notification.alert = 'Hello, World!'
+  notification.custom_data = { fields: bucket['fields'] }
+  APN.push(notification)
 end
+
+get '/buckets/:id' do
+  Bucket.find_by_id(params[:id]).to_json
+end
+
 get '/buckets/:id/listen' do
   if request.websocket?
     request.websocket do |ws|
       ws.onopen do
-	Bucket.get(params[:id])[0].listen(ws)
+      	Bucket.find_by_id(params[:id]).listen(ws)
       end
       # TODO: remove sockets on close
     end
@@ -112,4 +177,3 @@ get '/buckets/:id/listen' do
     { :error => "No websocket." }.to_json
   end
 end
-
