@@ -5,6 +5,10 @@ require 'mongo'
 require 'logger'
 require 'houston'
 require 'sinatra/cross_origin'
+require 'mongoid'
+
+# Setup
+Mongoid.load!("#{Dir.pwd}/mongoid.yml", :development)
 
 APN = Houston::Client.development
 APN.certificate = File.read("#{Dir.pwd}/pushcert.pem")
@@ -42,7 +46,7 @@ class Model
   def id=(id)
     @_id = id
   end
-  def to_json
+  def to_json(opts = {})
     to_hash.to_json
   end
   def collection
@@ -94,6 +98,10 @@ class Bucket < Model
       socket.send(payload)
     end
   end
+  def get_fields
+    @fields = Field.find({ '_id' => { '$in' => @fields } })
+    self
+  end
   def listen(ws)
     Sockets[@id] = ws
   end
@@ -107,15 +115,10 @@ class Field < Model
   end
 end
 
-Users = DB.create_collection('users')
-class User < Model
-  attr_accessor :username, :devices
-  def self.collection
-    Users
-  end
-  def initialize()
-    @devices = []
-  end
+class User
+  include Mongoid::Document
+  field :username, type: String
+  field :devices, type: Array, default: []
 end
 
 before do
@@ -154,7 +157,7 @@ post '/buckets' do
   bucket.to_json
 end
 
-put '/buckets/:id' do
+post '/buckets/:id' do
   bucket = Bucket.find_by_id(params[:id])
   bucket.populate request.body.read
   bucket.update!
@@ -162,27 +165,29 @@ put '/buckets/:id' do
 end
 
 put '/users/:id/add_device' do
-  user = User.find_by_id(params[:id])
+  user = User.find(params[:id])
   halt 404, 'User does not exist' unless user
 
   user.devices << @request_payload['device']
-  user.update!
+  user.save!
   user.to_json
 end
 
 put '/buckets/:id/request_content' do
-  user = User.find_one({ username: @request_payload['user'] })
+  user = User.find_by(username: @request_payload['user'])
   halt 404, 'User does not exist' unless user
   halt 400, 'User does not have a device registered' if user.devices.empty?
  
-  bucket = Bucket.find_by_id(params[:id])
+  bucket = Bucket.find_by_id(params[:id]).get_fields
   # TODO: make async
-  user.devices.each do |token|
-    notification = Houston::Notification.new(device: user.token)
+  user.devices.each do |device|
+    notification = Houston::Notification.new(device: device)
     notification.alert = 'Hello, World!'
-    notification.custom_data = { fields: bucket.fields }
+    notification.custom_data = { bucket: bucket }
     APN.push(notification)
   end
+
+  200
 end
 
 get '/buckets/:id' do
@@ -193,7 +198,7 @@ get '/buckets/:id/listen' do
   if request.websocket?
     request.websocket do |ws|
       ws.onopen do
-      	Bucket.find_by_id(params[:id]).listen(ws)
+        Bucket.find_by_id(params[:id]).listen(ws)
       end
       # TODO: remove sockets on close
     end
