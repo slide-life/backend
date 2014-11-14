@@ -95,7 +95,7 @@ post '/buckets' do
   validated_fields = Field.where(:name.in => fields)
   unless fields.length == validated_fields.length
     invalid_fields = fields - validated_fields.map { |field| field.name }
-    halt 400, "The field(s) #{invalid_fields.join(' ,')} are invalid"
+    halt 400, "The field(s) #{invalid_fields.join(', ')} are invalid"
   end
 
   # TODO: use user-specific encryption key

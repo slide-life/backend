@@ -17,6 +17,7 @@
 
 require 'rack/test'
 require 'sinatra'
+require 'json'
 require_relative '../app/app.rb'
 
 def app
