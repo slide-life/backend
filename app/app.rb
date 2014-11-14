@@ -76,6 +76,10 @@ end
 
 # Declare routes
 
+get '/' do
+  'We have lift-off! Review the API documentation to find the list of endpoints'  
+end
+
 post '/buckets' do
   fields = @request_payload
 
