@@ -1,11 +1,11 @@
 require 'sinatra'
 require 'sinatra-websocket'
 require 'json'
-require 'mongo'
 require 'logger'
 require 'houston'
 require 'sinatra/cross_origin'
 require 'mongoid'
+require 'moped'
 
 # Setup
 Mongoid.load!("#{Dir.pwd}/mongoid.yml", :development)
@@ -26,9 +26,10 @@ options "*" do
 end
 
 # Connect to the database
-CLIENT = Mongo::MongoClient.new('ds047800.mongolab.com', 47800, :logger => Logger.new(STDOUT))
-DB = CLIENT['slide']
-DB.authenticate('admin', 'slideinslideoutslideup')
+session = Moped::Session.new(['ds047800.mongolab.com:47800'])
+session.with(database: 'slide').login('admin', 'slideinslideoutslideup')
+Moped.logger = Logger.new($stdout)
+Moped.logger.level = Logger::DEBUG
 
 Sockets = {}
 class Bucket
