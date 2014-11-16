@@ -38,7 +38,7 @@ class Bucket
   field :key, type: String
   field :ids, type: Array, default: []
   def populate(payload)
-    Bucket.find(self.id).update(payload: payload)
+    Bucket.find(self.id).update(payload: payload) #payload here is fields and cipherkey
     socket = Sockets[@id]
     if socket
       socket.send(payload)
@@ -82,7 +82,7 @@ get '/' do
 end
 
 post '/buckets' do
-  fields = @request_payload
+  fields, key = @request_payload.fields, @request_payload.key
 
   if fields.length == 0
     halt 400, 'You cannot create a bucket with no fields'
@@ -102,14 +102,14 @@ post '/buckets' do
   # TODO: use user-specific encryption key
   # TODO: use field ids
   ids = validated_fields.map { |field| field.id }
-  bucket = Bucket.with_ids(1234, ids)
+  bucket = Bucket.with_ids(key, ids)
   bucket.create!
   bucket.to_json
 end
 
 post '/buckets/:id' do
   bucket = Bucket.find(params[:id])
-  bucket.populate @request_payload
+  bucket.populate @request_payload #this payload should have fields and cipherkey
   Bucket.find(params[:id]).to_json
 end
 
@@ -125,9 +125,10 @@ put '/buckets/:id/request_content' do
   user = User.find_by(username: @request_payload['user'])
   halt 404, 'User does not exist' unless user
   halt 400, 'User does not have a device registered' if user.devices.empty?
- 
+
   bucket = Bucket.find(params[:id]).get_fields
   # TODO: make async
+  # TODO: request_content must deliver key in bucket as well
   user.devices.each do |device|
     notification = Houston::Notification.new(device: device)
     notification.alert = 'Hello, World!'
