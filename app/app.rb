@@ -76,6 +76,10 @@ end
 
 # Declare routes
 
+get '/' do
+  'We have lift-off! Review the API documentation to find the list of endpoints'  
+end
+
 post '/buckets' do
   fields = @request_payload
 
@@ -91,7 +95,7 @@ post '/buckets' do
   validated_fields = Field.where(:name.in => fields)
   unless fields.length == validated_fields.length
     invalid_fields = fields - validated_fields.map { |field| field.name }
-    halt 400, "The field(s) #{invalid_fields.join(' ,')} are invalid"
+    halt 400, "The field(s) #{invalid_fields.join(', ')} are invalid"
   end
 
   # TODO: use user-specific encryption key
