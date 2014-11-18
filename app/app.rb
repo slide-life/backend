@@ -6,6 +6,7 @@ require 'houston'
 require 'sinatra/cross_origin'
 require 'mongoid'
 require 'moped'
+require 'rqrcode_png'
 
 # Setup
 Mongoid.load!("#{Dir.pwd}/mongoid.yml", :development)
@@ -154,5 +155,12 @@ get '/buckets/:id/listen' do
   else
     { :error => "No websocket." }.to_json
   end
+end
+
+get '/channels/:id/qr' do
+  content_type 'image/png'
+  qr = RQRCode::QRCode.new(params[:id])
+  png = qr.to_img.resize(300, 300)
+  png.to_blob
 end
 
