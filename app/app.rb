@@ -20,10 +20,29 @@ configure do
   set :allow_methods, [:get, :post, :options, :put]
 end
 
-options "*" do
-  response.headers["Allow"] = "HEAD,GET,PUT,DELETE,OPTIONS"
-  response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
+options '*' do
+  response.headers['Allow'] = 'HEAD,GET,PUT,DELETE,OPTIONS'
+  response.headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept'
   halt 200
+end
+
+# Initializers
+
+module BSON
+  class ObjectId
+    alias :to_json :to_s
+  end
+end
+
+module Mongoid
+  module Document
+    def to_json(options={})
+      attrs = super(options)
+      attrs['id'] = attrs['_id']
+      attrs.delete '_id'
+      attrs
+    end
+  end
 end
 
 # Connect to the database
@@ -33,27 +52,42 @@ Moped.logger = Logger.new($stdout)
 Moped.logger.level = Logger::DEBUG
 
 Sockets = {}
-class Bucket
-  include Mongoid::Document
-  field :payload, type: String
-  field :key, type: String
-  field :ids, type: Array, default: []
-  def populate(payload)
-    Bucket.find(self.id).update(payload: payload) #payload here is fields and cipherkey
+class Store
+  def listen(ws)
+    Sockets[self._id] = ws
+  end
+  def notify(payload)
     socket = Sockets[@id]
     if socket
       socket.send(payload)
     end
   end
-  def listen(ws)
-    Sockets[self._id] = ws
-  end
-  def self.with_ids(key, ids)
-    self.where(key: key, ids: ids)
+end
+
+class Bucket < Store
+  include Mongoid::Document
+  field :key, type: String
+  field :blocks, type: Array, default: []
+  field :payload, type: String
+  def populate(payload)
+    payload = payload
+    save!
   end
 end
 
-class Field
+class Channel < Store
+  include Mongoid::Document
+  field :key, type: String
+  field :blocks, type: Array, default: []
+  field :buckets, type: Array, default: []
+  field :open, type: Boolean, default: false
+  def stream(payload)
+    push(buckets: payload)
+    notify(payload)
+  end
+end
+
+class Block
   include Mongoid::Document
   field :name, type: String
   field :description, type: String
@@ -73,7 +107,7 @@ before do
   @request_payload = JSON.parse request.body.read unless request.body.length == 0
 end
 
-class InvalidFieldError < StandardError
+class InvalidBlockError < StandardError
 end
 
 # Declare routes
@@ -83,35 +117,32 @@ get '/' do
 end
 
 post '/buckets' do
-  fields, key = @request_payload.fields, @request_payload.key
+  blocks, key = @request_payload['blocks'], @request_payload['key']
 
-  if fields.length == 0
-    halt 400, 'You cannot create a bucket with no fields'
+  if blocks.length == 0
+    halt 400, 'You cannot create a bucket with no blocks'
   end
 
-  duplicate_fields = fields.select { |field| fields.count(field) > 1 }.uniq
-  if duplicate_fields.length > 0
-    halt 400, "You cannot create a bucket with duplicate fields. You have included #{duplicate_fields.join(' ,')} twice"
+  duplicate_blocks = blocks.select { |block| blocks.count(block) > 1 }.uniq
+  if duplicate_blocks.length > 0
+    halt 400, "You cannot create a bucket with duplicate blocks. You have included #{duplicate_blocks.join(' ,')} twice"
   end
 
-  validated_fields = Field.where(:name.in => fields)
-  unless fields.length == validated_fields.length
-    invalid_fields = fields - validated_fields.map { |field| field.name }
-    halt 400, "The field(s) #{invalid_fields.join(', ')} are invalid"
+  validated_blocks = Block.where(:name.in => blocks)
+  unless blocks.length == validated_blocks.length
+    invalid_blocks = blocks - validated_blocks.map { |block| block.name }
+    halt 400, "The block(s) #{invalid_blocks.join(', ')} are invalid"
   end
 
-  # TODO: use user-specific encryption key
-  # TODO: use field ids
-  ids = validated_fields.map { |field| field.id }
-  bucket = Bucket.with_ids(key, ids)
-  bucket.create!
+  bucket = Bucket.create!(key: key, blocks: validated_blocks.map { |block| block.id })
+  bucket.inspect
   bucket.to_json
 end
 
 post '/buckets/:id' do
   bucket = Bucket.find(params[:id])
-  bucket.populate @request_payload #this payload should have fields and cipherkey
-  Bucket.find(params[:id]).to_json
+  bucket.populate @request_payload # TODO: validate that the payload has blocks and cipherkey
+  204
 end
 
 put '/users/:id/add_device' do
@@ -153,8 +184,33 @@ get '/buckets/:id/listen' do
       # TODO: remove sockets on close
     end
   else
-    { :error => "No websocket." }.to_json
+    halt 422, { :error => 'No websocket.' }.to_json
   end
+end
+
+post '/channels' do
+  channel = Channel.create!(key: @request_payload['key'])
+  channel.to_json
+end
+
+get '/channels/:id' do
+  Channel.find(params[:id]).to_json
+end
+
+post '/channels/:id' do
+  channel = Channel.find(params[:id])
+  if channel.open
+    channel.stream @request_payload  # TODO: validate that the payload has blocks and cipherkey
+    channel.to_json
+  else
+    halt 422, { :error => 'Channel is not open.' }.to_json
+  end
+end
+
+put '/channels/:id' do
+  channel = Channel.find(params[:id])
+  channel.update(open: @request_payload['open'])
+  channel.to_json
 end
 
 get '/channels/:id/qr' do
@@ -163,4 +219,3 @@ get '/channels/:id/qr' do
   png = qr.to_img.resize(300, 300)
   png.to_blob
 end
-
