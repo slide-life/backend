@@ -104,7 +104,11 @@ end
 before do
   content_type :json
   request.body.rewind
-  @request_payload = JSON.parse request.body.read unless request.body.length == 0
+  begin
+    @request_payload = JSON.parse request.body.read unless request.body.length == 0
+  rescue JSON::ParserError
+    halt 400, { :error => 'Malformed JSON.' }.to_json
+  end
 end
 
 class InvalidBlockError < StandardError
@@ -120,18 +124,18 @@ post '/buckets' do
   blocks, key = @request_payload['blocks'], @request_payload['key']
 
   if blocks.length == 0
-    halt 400, 'You cannot create a bucket with no blocks'
+    halt 422, 'You cannot create a bucket with no blocks'
   end
 
   duplicate_blocks = blocks.select { |block| blocks.count(block) > 1 }.uniq
   if duplicate_blocks.length > 0
-    halt 400, "You cannot create a bucket with duplicate blocks. You have included #{duplicate_blocks.join(' ,')} twice"
+    halt 422, "You cannot create a bucket with duplicate blocks. You have included #{duplicate_blocks.join(' ,')} twice"
   end
 
   validated_blocks = Block.where(:name.in => blocks)
   unless blocks.length == validated_blocks.length
     invalid_blocks = blocks - validated_blocks.map { |block| block.name }
-    halt 400, "The block(s) #{invalid_blocks.join(', ')} are invalid"
+    halt 422, "The block(s) #{invalid_blocks.join(', ')} are invalid"
   end
 
   bucket = Bucket.create!(key: key, blocks: validated_blocks.map { |block| block.id })
@@ -156,7 +160,7 @@ end
 put '/buckets/:id/request_content' do
   user = User.find_by(username: @request_payload['user'])
   halt 404, 'User does not exist' unless user
-  halt 400, 'User does not have a device registered' if user.devices.empty?
+  halt 422, 'User does not have a device registered' if user.devices.empty?
 
   bucket = Bucket.find(params[:id]).get_fields
   # TODO: make async
