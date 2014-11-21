@@ -1,0 +1,10 @@
+development:
+  sessions:
+    default:
+      hosts:
+        - ds047800.mongolab.com:47800
+      database: slide
+      username: admin
+      password: slideinslideoutslideup
+  options:
+    raise_not_found_error: false
