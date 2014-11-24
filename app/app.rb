@@ -54,6 +54,10 @@ session.with(database: 'slide').login('admin', 'slideinslideoutslideup')
 Moped.logger = Logger.new($stdout)
 Moped.logger.level = Logger::DEBUG
 
+def halt_with_error(status, message)
+    halt status, { error: message }.to_json
+end
+
 Sockets = {}
 class Store
     def push(item)
@@ -139,7 +143,7 @@ before do
     begin
         @request_payload = JSON.parse request.body.read unless request.body.length == 0
     rescue JSON::ParserError
-        halt 400, { :error => 'Malformed JSON.' }.to_json
+        halt_with_error 400, 'Malformed JSON.'
     end
 end
 
@@ -149,25 +153,25 @@ end
 # Declare routes
 
 get '/' do
-    'We have lift-off! Review the API documentation to find the list of endpoints'  
+    'We have lift-off! Review the API documentation to find the list of endpoints.'
 end
 
 post '/buckets' do
     blocks, key = @request_payload['blocks'], @request_payload['key']
 
     if blocks.length == 0
-        halt 422, 'You cannot create a bucket with no blocks'
+        halt_with_error 422, 'You cannot create a bucket with no blocks.'
     end
 
     duplicate_blocks = blocks.select { |block| blocks.count(block) > 1 }.uniq
     if duplicate_blocks.length > 0
-        halt 422, "You cannot create a bucket with duplicate blocks. You have included #{duplicate_blocks.join(' ,')} twice"
+        halt_with_error 422, "You cannot create a bucket with duplicate blocks. You have included #{duplicate_blocks.join(' ,')} twice."
     end
 
     validated_blocks = Block.where(:name.in => blocks)
     unless blocks.length == validated_blocks.length
         invalid_blocks = blocks - validated_blocks.map { |block| block.name }
-        halt 422, "The block(s) #{invalid_blocks.join(', ')} are invalid"
+        halt_with_error 422, "The block(s) #{invalid_blocks.join(', ')} are invalid."
     end
 
     bucket = Bucket.create!(key: key, blocks: validated_blocks.map { |block| block.id })
@@ -183,7 +187,7 @@ end
 
 put '/users/:id/add_device' do
     user = User.find(params[:id])
-    halt 404, 'User does not exist' unless user
+    halt_with_error 404, 'User does not exist.' unless user
 
     user.update(devices: user.devices + [@request_payload['device']])
     user.to_json
@@ -191,8 +195,8 @@ end
 
 put '/buckets/:id/request_content' do
     user = User.find_by(username: @request_payload['user'])
-    halt 404, 'User does not exist' unless user
-    halt 422, 'User does not have a device registered' if user.devices.empty?
+    halt_with_error 404, 'User does not exist.' unless user
+    halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
 
     bucket = Bucket.find(params[:id]).get_fields
     # TODO: request_content must deliver key in bucket as well
@@ -204,7 +208,9 @@ put '/buckets/:id/request_content' do
 end
 
 get '/buckets/:id' do
-    Bucket.find(params[:id]).to_json
+    bucket = Bucket.find(params[:id])
+    halt_with_error 404, 'Bucket does not exist.' unless bucket
+    bucket.to_json
 end
 
 get '/buckets/:id/listen' do
@@ -216,7 +222,7 @@ get '/buckets/:id/listen' do
             # TODO: remove sockets on close
         end
     else
-        halt 422, { :error => 'No websocket.' }.to_json
+        halt_with_error 422, 'No websocket.'
     end
 end
 
@@ -230,7 +236,7 @@ get '/channels/:id' do
     if channel
         channel.to_json
     else
-        halt 400, { error: 'Channel not found.' }.to_json
+        halt_with_error 400, 'Channel not found.'
     end
 end
 
@@ -245,13 +251,13 @@ post '/channels/:id' do
                 channel.stream @request_payload
                 channel.to_json
             else
-                halt 422, { error: "Invalid payload, error: #{payload_status}" }.to_json
+                halt_with_error 422, "Invalid payload, error: #{payload_status}."
             end
         else
-            halt 422, { error: 'Bucket not found.' }.to_json
+            halt_with_error 422, 'Bucket not found.'
         end
     else
-        halt 422, { error: 'Channel is not open.' }.to_json
+        halt_with_error 422, 'Channel is not open.'
     end
 end
 
@@ -261,7 +267,7 @@ put '/channels/:id' do
         channel.update(open: @request_payload['open'])
         channel.to_json
     else
-        halt 400, { error: 'Channel not found.' }.to_json
+        halt_with_error 400, 'Channel not found.'
     end
 end
 
@@ -273,6 +279,6 @@ get '/channels/:id/qr' do
         png = qr.to_img.resize(300, 300)
         png.to_blob
     else
-        halt 400, { error: 'Channel not found.' }.to_json
+        halt_with_error 400, 'Channel not found.'
     end
 end
