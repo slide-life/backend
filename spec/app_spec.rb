@@ -7,7 +7,7 @@ describe 'API' do
     end
 
     it 'creates a bucket' do
-        post '/buckets', { 'key' => 'a_cryptographic_key', 'blocks' => ['first-name', 'last-name'] }.to_json,
+        post '/buckets', { 'key' => 'a_cryptographic_key', 'blocks' => ['first-name'] }.to_json,
             { 'CONTENT_TYPE' => 'application/json' }
         expect(last_response).to be_ok
     end
