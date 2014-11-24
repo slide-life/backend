@@ -147,9 +147,6 @@ before do
     end
 end
 
-class InvalidBlockError < StandardError
-end
-
 # Declare routes
 
 get '/' do
@@ -187,7 +184,7 @@ end
 
 put '/users/:id/add_device' do
     user = User.find(params[:id])
-    halt_with_error 404, 'User does not exist.' unless user
+    halt_with_error 404, 'User not found.' unless user
 
     user.update(devices: user.devices + [@request_payload['device']])
     user.to_json
@@ -195,7 +192,7 @@ end
 
 put '/buckets/:id/request_content' do
     user = User.find_by(username: @request_payload['user'])
-    halt_with_error 404, 'User does not exist.' unless user
+    halt_with_error 404, 'User not found.' unless user
     halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
 
     bucket = Bucket.find(params[:id]).get_fields
@@ -209,7 +206,7 @@ end
 
 get '/buckets/:id' do
     bucket = Bucket.find(params[:id])
-    halt_with_error 404, 'Bucket does not exist.' unless bucket
+    halt_with_error 404, 'Bucket not found.' unless bucket
     bucket.to_json
 end
 
@@ -233,11 +230,8 @@ end
 
 get '/channels/:id' do
     channel = Channel.find(params[:id])
-    if channel
-        channel.to_json
-    else
-        halt_with_error 400, 'Channel not found.'
-    end
+    halt_with_error 404, 'Channel not found.' unless channel
+    channel.to_json
 end
 
 post '/channels/:id' do
@@ -263,22 +257,18 @@ end
 
 put '/channels/:id' do
     channel = Channel.find(params[:id])
-    if channel
-        channel.update(open: @request_payload['open'])
-        channel.to_json
-    else
-        halt_with_error 400, 'Channel not found.'
-    end
+    halt_with_error 404, 'Channel not found.' unless channel
+
+    channel.update(open: @request_payload['open'])
+    channel.to_json
 end
 
 get '/channels/:id/qr' do
-    content_type 'image/png'
     channel = Channel.find(params[:id])
-    if channel
-        qr = RQRCode::QRCode.new(params[:id])
-        png = qr.to_img.resize(300, 300)
-        png.to_blob
-    else
-        halt_with_error 400, 'Channel not found.'
-    end
+    halt_with_error 404, 'Channel not found.' unless channel
+
+    content_type 'image/png'
+    qr = RQRCode::QRCode.new(params[:id])
+    png = qr.to_img.resize(300, 300)
+    png.to_blob
 end
