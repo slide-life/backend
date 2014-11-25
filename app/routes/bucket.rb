@@ -36,6 +36,7 @@ module BucketRoutes
         halt_with_error 422, 'No websocket.'
       end
     end
+    
     app.post '/buckets/:id' do
       bucket = Bucket.find(params[:id])
       bucket.populate @request_payload # TODO: validate that the payload has blocks and cipherkey
@@ -65,5 +66,3 @@ module BucketRoutes
     end
   end
 end
-
-
