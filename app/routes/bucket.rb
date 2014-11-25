@@ -65,7 +65,6 @@ module BucketRoutes
       end
 
       bucket = Bucket::Bucket.create!(key: key, blocks: validated_blocks.map { |block| block.id })
-      bucket.inspect
       bucket.to_json
     end
   end

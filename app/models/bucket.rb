@@ -1,4 +1,4 @@
-require './app/models/store.rb'
+require_relative 'store.rb'
 
 module Bucket
   include Store
