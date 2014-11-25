@@ -6,16 +6,16 @@ require 'houston'
 require 'rqrcode_png'
 require 'resque'
 
-require_relative 'models/bucket.rb'
-require_relative 'routes/bucket.rb'
-require_relative 'models/store.rb'
-require_relative 'models/channel.rb'
-require_relative 'routes/channel.rb'
-require_relative 'models/block.rb'
+require_relative 'models/bucket'
+require_relative 'routes/bucket'
+require_relative 'models/store'
+require_relative 'models/channel'
+require_relative 'routes/channel'
+require_relative 'models/block'
 
 # Initializers
-require_relative 'initializers/json.rb'
-require_relative 'initializers/cors.rb'
+require_relative 'initializers/json'
+require_relative 'initializers/cors'
 
 Resque.redis = Redis.new
 
@@ -32,10 +32,6 @@ end
 
 module Sinatra
   class App < Sinatra::Application
-    include Store
-    include Bucket
-    include Channel
-    include Block
     register BucketRoutes
     register ChannelRoutes
 

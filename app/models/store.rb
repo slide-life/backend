@@ -1,16 +1,12 @@
-module Store
-  Sockets = {}
-  class Store
-    def listen(ws)
-      Sockets[self._id] = ws
-    end
+class Store
+  @@Sockets =  {}
 
-    def notify(payload)
-      socket = Sockets[@id]
-      if socket
-        socket.send(payload)
-      end
-    end
+  def listen(ws)
+    @@Sockets[self._id] = ws
+  end
+
+  def notify(payload)
+    socket = @@Sockets[@id]
+    socket.send(payload) if socket
   end
 end
-

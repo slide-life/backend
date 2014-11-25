@@ -1,33 +1,31 @@
-require_relative 'store.rb'
+require 'mongoid'
 
-module Bucket
-  include Store
-  class Bucket < Store
-    include Mongoid::Document
-    field :key, type: String
-    field :blocks, type: Array, default: []
-    field :payload, type: String
+require_relative 'store'
 
-    def populate(payload)
-      payload = payload
-      save!
-    end
+class Bucket < Store
+  include Mongoid::Document
+  field :key, type: String
+  field :blocks, type: Array, default: []
+  field :payload, type: String
 
-    def check_payload(payload)
-      if payload['fields']
-        if payload['cipherkey']
-          if payload['fields'].keys.uniq.count != payload['fields'].keys.count
-            'Duplicate fields.'
-          elsif !payload['fields'].keys.to_set.equal?(self.blocks.to_set)
-            'Fields are not the same as blocks.'
-          end
-        else
-          'No cipherkey.'
+  def populate(payload)
+    payload = payload
+    save!
+  end
+
+  def check_payload(payload)
+    if payload['fields']
+      if payload['cipherkey']
+        if payload['fields'].keys.uniq.count != payload['fields'].keys.count
+          'Duplicate fields.'
+        elsif !payload['fields'].keys.to_set.equal?(self.blocks.to_set)
+          'Fields are not the same as blocks.'
         end
       else
-        'No fields.'
+        'No cipherkey.'
       end
+    else
+      'No fields.'
     end
   end
 end
-

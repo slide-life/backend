@@ -3,7 +3,7 @@ require 'bundler'
 
 Bundler.require
 
-require_relative 'config/config.rb'
-require_relative 'app/app.rb'
+require_relative 'config/config'
+require_relative 'app/app'
 
 run Sinatra::App

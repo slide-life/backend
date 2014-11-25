@@ -1,10 +1,7 @@
-require_relative '../models/channel.rb'
-require_relative '../models/bucket.rb'
+require_relative '../models/channel'
+require_relative '../models/bucket'
 
 module ChannelRoutes
-  include Channel
-  include Bucket
-
   def self.registered(app)
     app.post '/channels' do
       channel = Channel.create!(key: @request_payload['key'], blocks: @request_payload['blocks'])

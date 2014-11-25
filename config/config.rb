@@ -1,2 +1,2 @@
-require_relative 'mongoid.rb'
-require_relative 'APN.rb'
+require_relative 'mongoid'
+require_relative 'APN'

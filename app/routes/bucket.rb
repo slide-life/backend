@@ -1,12 +1,8 @@
-require_relative '../models/bucket.rb'
-require_relative '../models/block.rb'
-require_relative '../models/user.rb'
+require_relative '../models/bucket'
+require_relative '../models/block'
+require_relative '../models/user'
 
 module BucketRoutes
-  include Block
-  include Bucket
-  include User
-
   def self.registered(app)
     app.put '/buckets/:id/request_content' do
       user = User.find_by(username: @request_payload['user'])

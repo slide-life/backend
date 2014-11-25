@@ -1,11 +1,9 @@
 require 'mongoid'
 require 'moped'
 
-# Options
+# Connect to the database
 Mongoid.load!("#{File.dirname(__FILE__)}/mongoid.yml", :development)
 
-# Connect to the database
-session = Moped::Session.new(['ds047800.mongolab.com:47800'])
-session.with(database: 'slide').login('admin', 'slideinslideoutslideup')
+# Logging
 Moped.logger = Logger.new($stdout)
 Moped.logger.level = Logger::DEBUG
