@@ -1,3 +1,5 @@
+require 'rqrcode_png'
+
 require_relative '../models/channel'
 require_relative '../models/bucket'
 

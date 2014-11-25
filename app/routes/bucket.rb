@@ -1,6 +1,19 @@
+require 'houston'
+
 require_relative '../models/bucket'
 require_relative '../models/block'
 require_relative '../models/user'
+
+module NotificationJob
+  @queue = :default
+
+  def self.perform(params)
+    notification = Houston::Notification.new(device: params[:device])
+    notification.alert = 'Hello, World!'
+    notification.custom_data = { bucket: params[:bucket] }
+    APN.push(notification)
+  end
+end
 
 module BucketRoutes
   def self.registered(app)
