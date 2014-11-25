@@ -91,6 +91,7 @@ module Sinatra
     register BucketRoutes
     include Channel
     register ChannelRoutes
+    include Block
     # Connect to the database
     session = Moped::Session.new(['ds047800.mongolab.com:47800'])
     session.with(database: 'slide').login('admin', 'slideinslideoutslideup')

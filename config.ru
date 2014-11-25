@@ -6,4 +6,3 @@ Bundler.require
 require './app/app.rb'
 
 run Sinatra::App
-
