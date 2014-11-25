@@ -21,7 +21,7 @@ require 'json'
 require_relative '../app/app.rb'
 
 def app
-  Junk::JunkApp
+  Sinatra::App
 end
 
 RSpec.configure do |config|

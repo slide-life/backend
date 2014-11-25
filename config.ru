@@ -5,5 +5,5 @@ Bundler.require
 
 require './app/app.rb'
 
-run Junk::JunkApp
+run Sinatra::App
 
