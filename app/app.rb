@@ -4,20 +4,16 @@ require 'json'
 require 'logger'
 require 'houston'
 require 'rqrcode_png'
-require 'resque'
 
-require_relative 'models/bucket'
 require_relative 'routes/bucket'
-require_relative 'models/store'
-require_relative 'models/channel'
 require_relative 'routes/channel'
-require_relative 'models/block'
+require_relative 'routes/user'
+require_relative 'routes/block'
 
 # Initializers
 require_relative 'initializers/json'
 require_relative 'initializers/cors'
-
-Resque.redis = Redis.new
+require_relative 'initializers/resque'
 
 module NotificationJob
   @queue = :default
@@ -34,6 +30,8 @@ module Sinatra
   class App < Sinatra::Application
     register BucketRoutes
     register ChannelRoutes
+    register UserRoutes
+    register BlockRoutes
 
     def halt_with_error(status, message)
       halt status, { error: message }.to_json
@@ -50,22 +48,8 @@ module Sinatra
       end
     end
 
-    # Declare routes
-
     get '/' do
-      'We have lift-off! Review the API documentation to find the list of endpoints.'
-    end
-
-    put '/users/:id/add_device' do
-      user = User.find(params[:id])
-      halt_with_error 404, 'User not found.' unless user
-
-      user.update(devices: user.devices + [@request_payload['device']])
-      user.to_json
-    end
-
-    get '/blocks' do
-      Block.all.to_json
+      { message: 'We have lift-off! Review the API documentation to find the list of endpoints.' }.to_json
     end
   end
 end
