@@ -1,8 +1,11 @@
 require './app/models/bucket.rb'
 require './app/models/block.rb'
+require './app/models/user.rb'
 
 module BucketRoutes
   include Block
+  include Bucket
+  include User
 
   def self.registered(app)
     app.put '/buckets/:id/request_content' do
