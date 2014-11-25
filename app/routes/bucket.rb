@@ -1,6 +1,6 @@
-require './app/models/bucket.rb'
-require './app/models/block.rb'
-require './app/models/user.rb'
+require_relative '../models/bucket.rb'
+require_relative '../models/block.rb'
+require_relative '../models/user.rb'
 
 module BucketRoutes
   include Block

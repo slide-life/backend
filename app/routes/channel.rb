@@ -1,5 +1,5 @@
-require './app/models/channel.rb'
-require './app/models/bucket.rb'
+require_relative '../models/channel.rb'
+require_relative '../models/bucket.rb'
 
 module ChannelRoutes
   include Channel
