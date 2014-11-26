@@ -25,6 +25,7 @@ module Sinatra
     end
 
     before do
+        puts "Begin request"
       content_type :json
       body = request.body.read
       request.body.rewind
