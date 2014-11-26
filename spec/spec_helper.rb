@@ -16,8 +16,9 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 require 'rack/test'
-require 'sinatra'
-require 'json'
+
+Bundler.require
+require_relative '../config/config'
 require_relative '../app/app'
 
 def app
