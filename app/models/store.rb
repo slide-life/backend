@@ -1,5 +1,5 @@
 class Store
-  @@Sockets =  {}
+  @@Sockets = {}
 
   def listen(ws)
     @@Sockets[self._id] = ws
