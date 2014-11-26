@@ -10,7 +10,7 @@ module Mongoid
     def to_json(options={})
       attrs = super(options)
       attrs['id'] = attrs['_id']
-      attrs.delete '_id'
+      attrs.delete '_id' #TODO modify this to actually delete it, not for now though
       attrs
     end
   end

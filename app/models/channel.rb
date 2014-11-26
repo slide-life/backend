@@ -8,7 +8,6 @@ class Channel < Store
   field :open, type: Boolean, default: false
 
   def stream(payload)
-    push(buckets: payload)
     notify(payload)
   end
 end

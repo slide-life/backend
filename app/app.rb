@@ -2,8 +2,6 @@ require 'sinatra'
 require 'sinatra-websocket'
 require 'json'
 require 'logger'
-require 'houston'
-require 'rqrcode_png'
 
 require_relative 'routes/bucket'
 require_relative 'routes/channel'
@@ -14,17 +12,6 @@ require_relative 'routes/block'
 require_relative 'initializers/json'
 require_relative 'initializers/cors'
 require_relative 'initializers/resque'
-
-module NotificationJob
-  @queue = :default
-
-  def self.perform(params)
-    notification = Houston::Notification.new(device: params[:device])
-    notification.alert = 'Hello, World!'
-    notification.custom_data = { bucket: params[:bucket] }
-    APN.push(notification)
-  end
-end
 
 module Sinatra
   class App < Sinatra::Application
