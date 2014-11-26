@@ -1,4 +1,3 @@
-# Initializers
 module BSON
   class ObjectId
     alias :to_json :to_s
