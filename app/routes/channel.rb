@@ -7,7 +7,6 @@ require_relative '../models/bucket'
 module ChannelRoutes
     def self.registered(app)
         ['/channels/:id', '/channels/:id/qr', '/channels/:id/listen'].each do |pattern|
-            puts "BEFORE"
             app.before pattern do
                 @oid = BSON::ObjectId.from_string(params[:id])
             end
@@ -64,9 +63,7 @@ module ChannelRoutes
         end
 
         app.get '/channels/:id/listen' do
-            puts "oid: #{@oid.inspect}"
             channel = Channel.find(@oid)
-            puts "Channel: #{channel.inspect}"
 
             if request.websocket?
                 request.websocket do |ws|
