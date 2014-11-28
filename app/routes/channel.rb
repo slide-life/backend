@@ -59,15 +59,14 @@ module ChannelRoutes
 
     app.get '/channels/:id/listen' do
       channel = Channel.find(@oid)
+      halt_with_error 404, 'Channel not found.' unless channel
+      halt_with_error 422, 'Channel is not open.' unless channel.open
 
-      if request.websocket?
-        request.websocket do |ws|
-          ws.onopen do
-            channel.listen(ws)
-          end
+      halt_with_error 422, 'No websocket.' unless request.websocket?
+      request.websocket do |ws|
+        ws.onopen do
+          channel.listen(ws)
         end
-      else
-        halt_with_error 422, 'No websocket.'
       end
     end
   end
