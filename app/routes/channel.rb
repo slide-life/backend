@@ -27,17 +27,12 @@ module ChannelRoutes
       channel = Channel.find(@oid)
       if channel.open
         #check payload conforms to schema set out in slide.js: fields, cipherkey
-        bucket = Bucket.find(@request_payload['bucket_id']) #TODO: any related modification
-        if bucket
-          payload_status = bucket.check_payload(@request_payload)
-          if payload_status == :ok
-            channel.stream @request_payload
-            channel.to_json
-          else
-            halt_with_error 422, "Invalid payload, error: #{payload_status}."
-          end
+        payload_status = channel.check_payload(@request_payload)
+        if payload_status == :ok
+          channel.stream @request_payload.to_json
+          channel.to_json
         else
-          halt_with_error 422, 'Bucket not found.'
+          halt_with_error 422, "Invalid payload, error: #{payload_status}."
         end
       else
         halt_with_error 422, 'Channel is not open.'
@@ -66,12 +61,14 @@ module ChannelRoutes
       channel = Channel.find(@oid)
 
       if request.websocket?
+        puts 'Request is websocket.'
         request.websocket do |ws|
           ws.onopen do
             channel.listen(ws)
           end
         end
       else
+        puts 'No websocket.'
         halt_with_error 422, 'No websocket.'
       end
     end
