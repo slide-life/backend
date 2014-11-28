@@ -12,7 +12,6 @@ class Channel < Store
   end
 
   def check_payload(payload)
-    puts "Inspecting #{payload}"
     if payload['fields']
       if payload['cipherkey']
         if payload['fields'].keys.uniq.count != payload['fields'].keys.count

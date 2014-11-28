@@ -61,14 +61,12 @@ module ChannelRoutes
       channel = Channel.find(@oid)
 
       if request.websocket?
-        puts 'Request is websocket.'
         request.websocket do |ws|
           ws.onopen do
             channel.listen(ws)
           end
         end
       else
-        puts 'No websocket.'
         halt_with_error 422, 'No websocket.'
       end
     end
