@@ -2,9 +2,29 @@ development:
   sessions:
     default:
       hosts:
-        - ds047800.mongolab.com:47800
-      database: slide
-      username: admin
-      password: slideinslideoutslideup
+        - <%= ENV['DB_DEVELOPMENT_HOST'] %>
+      database: slide-development
+      username: <%= ENV['DB_DEVELOPMENT_USERNAME'] %>
+      password: <%= ENV['DB_DEVELOPMENT_PASSWORD'] %>
+  options:
+    raise_not_found_error: false
+staging:
+  sessions:
+    default:
+      hosts:
+        - <%= ENV['DB_STAGING_HOST'] %>
+      database: slide-staging
+      username: <%= ENV['DB_STAGING_USERNAME'] %>
+      password: <%= ENV['DB_STAGING_PASSWORD'] %>
+  options:
+    raise_not_found_error: false
+production:
+  sessions:
+    default:
+      hosts:
+        - <%= ENV['DB_PRODUCTION_HOST'] %>
+      database: slide-production
+      username: <%= ENV['DB_PRODUCTION_USERNAME'] %>
+      password: <%= ENV['DB_PRODUCTION_PASSWORD'] %>
   options:
     raise_not_found_error: false
