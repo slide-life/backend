@@ -9,5 +9,9 @@ module UserRoutes
       user.update(devices: user.devices + [@request_payload['device']])
       user.to_json
     end
+
+    app.get '/users' do
+      User.where(params).to_json
+    end
   end
 end
