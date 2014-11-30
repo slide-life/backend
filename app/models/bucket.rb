@@ -12,20 +12,4 @@ class Bucket < Store
     payload = payload
     save!
   end
-
-  def check_payload(payload)
-    if payload['fields']
-      if payload['cipherkey']
-        if payload['fields'].keys.uniq.count != payload['fields'].keys.count
-          'Duplicate fields.'
-        elsif !payload['fields'].keys.to_set.equal?(self.blocks.to_set)
-          'Fields are not the same as blocks.'
-        end
-      else
-        'No cipherkey.'
-      end
-    else
-      'No fields.'
-    end
-  end
 end

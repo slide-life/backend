@@ -13,8 +13,17 @@ module ChannelRoutes
     end
 
     app.post '/channels' do
-      channel = Channel.create!(key: @request_payload['key'], blocks: @request_payload['blocks'])
-      channel.to_json
+      blocks, key = @request_payload['blocks'], @request_payload['key']
+      channel = Channel.new(key: key, blocks: blocks)
+
+      begin
+        channel.validate_blocks
+      rescue InvalidBlockError => error
+        halt_with_error 422, error.message
+      else
+        channel.save!
+        channel.to_json
+      end
     end
 
     app.get '/channels/:id' do
