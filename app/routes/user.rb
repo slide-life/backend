@@ -13,5 +13,10 @@ module UserRoutes
     app.get '/users' do
       User.where(params).to_json
     end
+
+    app.post '/users' do
+      user = User.create!(number: @request_payload['user'], devices: [@request_payload['device']])
+      user.to_json
+    end
   end
 end
