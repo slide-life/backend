@@ -5,7 +5,7 @@ class Channel < Store
   field :key, type: String
   field :blocks, type: Array, default: []
   field :buckets, type: Array, default: []
-  field :open, type: Boolean, default: false
+  field :open, type: Boolean, default: true
 
   def stream(payload)
     self.buckets << payload
