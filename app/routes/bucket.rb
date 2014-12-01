@@ -18,7 +18,7 @@ end
 module BucketRoutes
   def self.registered(app)
     app.put '/buckets/:id/request_content' do
-      user = User.find_by(username: @request_payload['user'])
+      user = User.find_by(number: @request_payload['number'])
       halt_with_error 404, 'User not found.' unless user
       halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
 
