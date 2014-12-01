@@ -1,7 +1,6 @@
 require 'houston'
 
 require_relative '../models/bucket'
-require_relative '../models/block'
 require_relative '../models/user'
 
 module NotificationJob
@@ -24,18 +23,40 @@ module BucketRoutes
 
       bucket = Bucket.find(params[:id])
       halt_with_error 422, 'Bucket not found.' unless bucket
-      fields = bucket.get_fields
       # TODO: request_content must deliver key in bucket as well
       user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
-        Resque.enqueue NotificationJob, device: device, bucket: fields
+        Resque.enqueue NotificationJob, device: device, bucket: bucket
       end
 
       200
     end
 
+    app.post '/buckets' do
+      blocks, key = @request_payload['blocks'], @request_payload['key']
+      bucket = Bucket.new(key: key, blocks: blocks)
+      
+      begin
+        bucket.validate_blocks
+      rescue InvalidBlockError => error
+        halt_with_error 422, error.message
+      else
+        bucket.save!
+        bucket.to_json
+      end
+    end
+
     app.get '/buckets/:id' do
       bucket = Bucket.find(params[:id])
       halt_with_error 404, 'Bucket not found.' unless bucket
+      bucket.to_json
+    end
+
+    app.post '/buckets/:id' do
+      bucket = Bucket.find(params[:id])
+      payload_status = bucket.check_payload(@request_payload)
+      halt_with_error 422, "Invalid payload, error: #{payload_status}" unless payload_status == :ok
+
+      bucket.populate @request_payload
       bucket.to_json
     end
 
@@ -52,32 +73,18 @@ module BucketRoutes
       end
     end
 
-    app.post '/buckets/:id' do
-      bucket = Bucket.find(params[:id])
-      bucket.populate @request_payload # TODO: validate that the payload has blocks and cipherkey
+    app.put '/buckets/:id/request_content' do
+      user = User.find_by(username: @request_payload['user'])
+      halt_with_error 404, 'User not found.' unless user
+      halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
+
+      bucket = Bucket.find(params[:id]).get_fields
+      # TODO: request_content must deliver key in bucket as well
+      user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
+        Resque.enqueue NotificationJob, device: device, bucket: bucket
+      end
+
       204
-    end
-
-    app.post '/buckets' do
-      blocks, key = @request_payload['blocks'], @request_payload['key']
-
-      if blocks.length == 0
-        halt_with_error 422, 'You cannot create a bucket with no blocks.'
-      end
-
-      duplicate_blocks = blocks.select { |block| blocks.count(block) > 1 }.uniq
-      if duplicate_blocks.length > 0
-        halt_with_error 422, "You cannot create a bucket with duplicate blocks. You have included #{duplicate_blocks.join(' ,')} twice."
-      end
-
-      validated_blocks = Block.where(:name.in => blocks)
-      unless blocks.length == validated_blocks.length
-        invalid_blocks = blocks - validated_blocks.map { |block| block.name }
-        halt_with_error 422, "The block(s) #{invalid_blocks.join(', ')} are invalid."
-      end
-
-      bucket = Bucket::Bucket.create!(key: key, blocks: validated_blocks.map { |block| block.id })
-      bucket.to_json
     end
   end
 end

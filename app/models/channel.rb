@@ -8,24 +8,8 @@ class Channel < Store
   field :open, type: Boolean, default: false
 
   def stream(payload)
+    self.buckets << payload
+    save!
     notify(payload)
-  end
-
-  def check_payload(payload)
-    if payload['fields']
-      if payload['cipherkey']
-        if payload['fields'].keys.uniq.count != payload['fields'].keys.count
-          'Duplicate fields.'
-        elsif !payload['fields'].keys.to_set.subset?(self.blocks.to_set)
-          'Fields are not subset of blocks.'
-        else
-          :ok
-        end
-      else
-        'No cipherkey.'
-      end
-    else
-      'No fields.'
-    end
   end
 end

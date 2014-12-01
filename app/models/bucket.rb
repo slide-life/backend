@@ -6,26 +6,11 @@ class Bucket < Store
   include Mongoid::Document
   field :key, type: String
   field :blocks, type: Array, default: []
-  field :payload, type: String
+  field :data, type: Array, default: []
 
   def populate(payload)
-    payload = payload
+    self.data << payload
     save!
-  end
-
-  def check_payload(payload)
-    if payload['fields']
-      if payload['cipherkey']
-        if payload['fields'].keys.uniq.count != payload['fields'].keys.count
-          'Duplicate fields.'
-        elsif !payload['fields'].keys.to_set.equal?(self.blocks.to_set)
-          'Fields are not the same as blocks.'
-        end
-      else
-        'No cipherkey.'
-      end
-    else
-      'No fields.'
-    end
+    notify(payload)
   end
 end
