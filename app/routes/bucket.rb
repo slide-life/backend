@@ -22,10 +22,12 @@ module BucketRoutes
       halt_with_error 404, 'User not found.' unless user
       halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
 
-      bucket = Bucket.find(params[:id]).get_fields
+      bucket = Bucket.find(params[:id])
+      halt_with_error 422, 'Bucket not found.' unless bucket
+      fields = bucket.get_fields
       # TODO: request_content must deliver key in bucket as well
       user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
-        Resque.enqueue NotificationJob, device: device, bucket: bucket
+        Resque.enqueue NotificationJob, device: device, bucket: fields
       end
 
       200
