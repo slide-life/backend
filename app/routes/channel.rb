@@ -4,6 +4,17 @@ require 'bson'
 require_relative '../models/channel'
 require_relative '../models/bucket'
 
+module NotificationJob
+  @queue = :default
+
+  def self.perform(params)
+    notification = Houston::Notification.new(device: params[:device])
+    notification.alert = 'Hello, World!'
+    notification.custom_data = { channel: params[:channel] }
+    APN.push(notification)
+  end
+end
+
 module ChannelRoutes
   def self.registered(app)
     ['/channels/:id', '/channels/:id/qr', '/channels/:id/listen'].each do |pattern|
@@ -71,6 +82,20 @@ module ChannelRoutes
           channel.listen(ws)
         end
       end
+    end
+
+    app.put '/channels/:id/request_content' do
+      user = User.find_by(number: @request_payload['user'])
+      halt_with_error 404, 'User not found.' unless user
+      halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
+
+      channel = Channel.find(@oid)
+      # TODO: request_content must deliver key in bucket as well
+      user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
+        Resque.enqueue NotificationJob, device: device, channel: channel
+      end
+
+      204
     end
   end
 end
