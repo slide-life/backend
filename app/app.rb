@@ -3,7 +3,6 @@ require 'sinatra-websocket'
 require 'json'
 require 'logger'
 
-require_relative 'routes/bucket'
 require_relative 'routes/channel'
 require_relative 'routes/user'
 require_relative 'routes/block'
@@ -15,7 +14,6 @@ require_relative 'initializers/resque'
 
 module Sinatra
   class App < Sinatra::Application
-    register BucketRoutes
     register ChannelRoutes
     register UserRoutes
     register BlockRoutes

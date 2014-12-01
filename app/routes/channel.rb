@@ -2,7 +2,6 @@ require 'rqrcode_png'
 require 'bson'
 
 require_relative '../models/channel'
-require_relative '../models/bucket'
 
 module NotificationJob
   @queue = :default
@@ -17,7 +16,7 @@ end
 
 module ChannelRoutes
   def self.registered(app)
-    ['/channels/:id', '/channels/:id/qr', '/channels/:id/listen'].each do |pattern|
+    ['/channels/:id', '/channels/:id/qr', '/channels/:id/listen', '/channels/:id/request_contents'].each do |pattern|
       app.before pattern do
         @oid = BSON::ObjectId.from_string(params[:id])
       end
@@ -89,10 +88,12 @@ module ChannelRoutes
       halt_with_error 404, 'User not found.' unless user
       halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
 
-      channel = Channel.find(@oid)
+      channel = Channel.find(params[:id])
+      halt_with_error 404, 'Channel not found.' unless channel
       # TODO: request_content must deliver key in bucket as well
       user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
-        Resque.enqueue NotificationJob, device: device, channel: channel
+        # TODO: Resque.enqueue NotificationJob, device: device, channel: channel
+	NotificationJob.perform(device: device, channel: channel)
       end
 
       204
