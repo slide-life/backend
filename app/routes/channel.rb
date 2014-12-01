@@ -34,18 +34,12 @@ module ChannelRoutes
 
     app.post '/channels/:id' do
       channel = Channel.find(@oid)
-      if channel.open
-        #check payload conforms to schema set out in slide.js: fields, cipherkey
-        payload_status = channel.check_payload(@request_payload)
-        if payload_status == :ok
-          channel.stream @request_payload.to_json
-          channel.to_json
-        else
-          halt_with_error 422, "Invalid payload, error: #{payload_status}."
-        end
-      else
-        halt_with_error 422, 'Channel is not open.'
-      end
+      payload_status = channel.check_payload(@request_payload)
+      halt_with_error 422, 'Channel is not open.' unless channel.open
+      halt_with_error 422, "Invalid payload, error: #{payload_status}" unless payload_status == :ok
+
+      channel.stream @request_payload.to_json
+      channel.to_json
     end
 
     app.put '/channels/:id' do

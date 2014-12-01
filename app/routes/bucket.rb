@@ -38,7 +38,10 @@ module BucketRoutes
 
     app.post '/buckets/:id' do
       bucket = Bucket.find(params[:id])
-      bucket.populate @request_payload # TODO: validate that the payload has blocks and cipherkey
+      payload_status = bucket.check_payload(@request_payload)
+      halt_with_error 422, "Invalid payload, error: #{payload_status}" unless payload_status == :ok
+
+      bucket.populate @request_payload
       204
     end
 

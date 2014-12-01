@@ -8,6 +8,8 @@ class Channel < Store
   field :open, type: Boolean, default: false
 
   def stream(payload)
+    self.buckets << payload
+    save!
     notify(payload)
   end
 end

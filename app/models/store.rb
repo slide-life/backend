@@ -53,7 +53,7 @@ class Store
     return 'No fields.' unless payload['fields']
     return 'No cipherkey.' unless payload['cipherkey']
     return 'Duplicate fields.' unless payload['fields'].keys.uniq.count == payload['fields'].keys.count
-    return 'Fields are not subset of blocks.' unless payload['fields'].keys.to_set.subset?(@blocks.to_set) 
+    return 'Fields are not subset of blocks.' unless payload['fields'].keys.to_set.subset?(self.blocks.to_set)
       
     :ok
   end
