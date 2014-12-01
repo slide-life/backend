@@ -42,7 +42,7 @@ module BucketRoutes
       halt_with_error 422, "Invalid payload, error: #{payload_status}" unless payload_status == :ok
 
       bucket.populate @request_payload
-      204
+      bucket.to_json
     end
 
     app.get '/buckets/:id/listen' do

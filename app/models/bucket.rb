@@ -6,10 +6,10 @@ class Bucket < Store
   include Mongoid::Document
   field :key, type: String
   field :blocks, type: Array, default: []
-  field :payload, type: Array, default: []
+  field :data, type: Array, default: []
 
   def populate(payload)
-    self.payload << payload
+    self.data << payload
     save!
     notify(payload)
   end
