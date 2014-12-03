@@ -16,7 +16,7 @@ end
 
 module ChannelRoutes
   def self.registered(app)
-    ['/channels/:id', '/channels/:id/qr', '/channels/:id/listen', '/channels/:id/request_contents'].each do |pattern|
+    ['/channels/:id', '/channels/:id/qr', '/channels/:id/listen', '/channels/:id/request_content'].each do |pattern|
       app.before pattern do
         @oid = BSON::ObjectId.from_string(params[:id])
       end
@@ -93,7 +93,7 @@ module ChannelRoutes
       # TODO: request_content must deliver key in bucket as well
       user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
         # TODO: Resque.enqueue NotificationJob, device: device, channel: channel
-	NotificationJob.perform(device: device, channel: channel)
+      	NotificationJob.perform(device: device, channel: channel)
       end
 
       204
