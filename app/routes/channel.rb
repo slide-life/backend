@@ -52,14 +52,6 @@ module ChannelRoutes
       channel.to_json
     end
 
-    app.put '/channels/:id' do
-      channel = Channel.find(@oid)
-      halt_with_error 404, 'Channel not found.' unless channel
-
-      channel.update(open: @request_payload['open'])
-      channel.to_json
-    end
-
     app.get '/channels/:id/qr' do
       channel = Channel.find(@oid)
       halt_with_error 404, 'Channel not found.' unless channel

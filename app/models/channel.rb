@@ -3,10 +3,9 @@ end
 
 class Channel
   include Mongoid::Document
-  field :key, type: Hash
+  field :key, type: String
   field :blocks, type: Array, default: []
   field :buckets, type: Array, default: []
-  field :open, type: Boolean, default: true
 
   VALID_CUSTOM_BLOCK_TYPES = ['text', 'number']
   @@Sockets = {}
