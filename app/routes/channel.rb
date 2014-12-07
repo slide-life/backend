@@ -45,7 +45,6 @@ module ChannelRoutes
     app.post '/channels/:id' do
       channel = Channel.find(@oid)
       payload_status = channel.check_payload(@request_payload)
-      halt_with_error 422, 'Channel is not open.' unless channel.open
       halt_with_error 422, "Invalid payload, error: #{payload_status}" unless payload_status == :ok
 
       channel.stream @request_payload.to_json
@@ -65,7 +64,6 @@ module ChannelRoutes
     app.get '/channels/:id/listen' do
       channel = Channel.find(@oid)
       halt_with_error 404, 'Channel not found.' unless channel
-      halt_with_error 422, 'Channel is not open.' unless channel.open
 
       halt_with_error 422, 'No websocket.' unless request.websocket?
       request.websocket do |ws|
