@@ -47,7 +47,7 @@ module ChannelRoutes
       payload_status = channel.check_payload(@request_payload)
       halt_with_error 422, "Invalid payload, error: #{payload_status}" unless payload_status == :ok
 
-      channel.stream @request_payload.to_json
+      channel.stream @request_payload
       channel.to_json
     end
 

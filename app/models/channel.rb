@@ -22,7 +22,7 @@ class Channel
   def stream(payload)
     self.responses << payload
     save!
-    notify(payload)
+    notify(payload.to_json)
   end
 
   def validate_static_blocks(blocks)
