@@ -80,7 +80,7 @@ module ChannelRoutes
 
       channel = Channel.find(params[:id])
       halt_with_error 404, 'Channel not found.' unless channel
-      # TODO: request_content must deliver key in bucket as well
+      # TODO: request_content must deliver key in channel as well
       user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
         # TODO: Resque.enqueue NotificationJob, device: device, channel: channel
       	NotificationJob.perform(device: device, channel: channel)

@@ -6,15 +6,15 @@ describe 'API' do
     expect(last_response).to be_ok
   end
 
-  it 'creates a bucket' do
-    post '/buckets', {'key' => 'a_cryptographic_key', 'blocks' => ['first-name']}.to_json,
+  it 'creates a channel' do
+    post '/channels', {'key' => 'a_cryptographic_key', 'blocks' => ['first-name']}.to_json,
          {'CONTENT_TYPE' => 'application/json'}
     expect(last_response).to be_ok
   end
 
-  it 'fails to create bucket' do
+  it 'fails to create channel' do
     # Uses underscore instead of hyphen
-    post '/buckets', {'key' => 'a_cryptographic_key', 'blocks' => ['first_name', 'last_name']}.to_json,
+    post '/channels', {'key' => 'a_cryptographic_key', 'blocks' => ['first_name', 'last_name']}.to_json,
          {'CONTENT_TYPE' => 'application/json'}
     expect(last_response).not_to be_ok
   end

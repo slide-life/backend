@@ -5,7 +5,7 @@ class Channel
   include Mongoid::Document
   field :key, type: String
   field :blocks, type: Array, default: []
-  field :buckets, type: Array, default: []
+  field :responses, type: Array, default: []
 
   VALID_CUSTOM_BLOCK_TYPES = ['text', 'number']
   @@Sockets = {}
@@ -20,7 +20,7 @@ class Channel
   end
 
   def stream(payload)
-    self.buckets << payload
+    self.responses << payload
     save!
     notify(payload)
   end
@@ -28,7 +28,7 @@ class Channel
   def validate_static_blocks(blocks)
     duplicate_blocks = blocks.select { |block| blocks.count(block) > 1 }.uniq
     if duplicate_blocks.length > 0
-      raise InvalidBlockError, "You cannot create a bucket with duplicate blocks. You have included #{duplicate_blocks.join(', ')} twice."
+      raise InvalidBlockError, "You cannot create a channel with duplicate blocks. You have included #{duplicate_blocks.join(', ')} twice."
     end
 
     validated_blocks = Block.where(:name.in => blocks)
@@ -51,7 +51,7 @@ class Channel
     static_blocks = self.blocks.select { |block| block.is_a? String }
     custom_blocks = self.blocks.select { |block| block.is_a? Hash }
 
-    raise InvalidBlockError, 'You cannot create a bucket with no blocks.' if self.blocks.length == 0
+    raise InvalidBlockError, 'You cannot create a channel with no blocks.' if self.blocks.length == 0
     raise InvalidBlockError, 'Invalid block representation' unless static_blocks.count + custom_blocks.count == self.blocks.count
 
     validate_static_blocks(static_blocks)
