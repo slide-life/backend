@@ -11,7 +11,7 @@ module UserRoutes
     end
 
     app.post '/users' do
-      user = User.create!(number: @request_payload['user'], devices: [@request_payload['device']])
+      user = User.create!(number: @request_payload['user'], devices: [@request_payload['device']], public_key: @request_payload['public_key'])
       user.to_json
     end
   end

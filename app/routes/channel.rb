@@ -1,7 +1,9 @@
 require 'rqrcode_png'
 require 'bson'
+require 'json'
 
 require_relative '../models/channel'
+require_relative '../models/user'
 
 module NotificationJob
   @queue = :default
@@ -24,7 +26,8 @@ module ChannelRoutes
 
     app.post '/channels' do
       blocks, key = @request_payload['blocks'], @request_payload['key']
-      channel = Channel.new(key: key, blocks: blocks)
+      number = @request_payload['number']
+      channel = Channel.new(key: key, blocks: blocks, number: number)
 
       begin
         channel.validate_blocks
@@ -32,23 +35,24 @@ module ChannelRoutes
         halt_with_error 422, error.message
       else
         channel.save!
-        channel.to_json
+        channel.serialize
       end
     end
 
     app.get '/channels/:id' do
       channel = Channel.find(@oid)
       halt_with_error 404, 'Channel not found.' unless channel
-      channel.to_json
+      channel.serialize
     end
 
     app.post '/channels/:id' do
       channel = Channel.find(@oid)
+      halt_with_error 404, "Could not find channel" unless channel
       payload_status = channel.check_payload(@request_payload)
       halt_with_error 422, "Invalid payload, error: #{payload_status}" unless payload_status == :ok
 
       channel.stream @request_payload
-      channel.to_json
+      channel.serialize
     end
 
     app.get '/channels/:id/qr' do

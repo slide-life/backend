@@ -6,6 +6,7 @@ class Channel
   field :key, type: String
   field :blocks, type: Array, default: []
   field :responses, type: Array, default: []
+  belongs_to :recipient, class_name: "User", foreign_key: :number
 
   VALID_CUSTOM_BLOCK_TYPES = ['text', 'number']
   @@Sockets = {}
@@ -65,5 +66,11 @@ class Channel
     return 'Fields are not subset of blocks.' unless payload['fields'].keys.to_set.subset?(self.blocks.to_set)
       
     :ok
+  end
+
+  def serialize
+    dict = JSON.parse(self.to_json)
+    dict['user'] = User.find_by(number: self.number)
+    dict.to_json
   end
 end
