@@ -27,6 +27,10 @@ module ChannelRoutes
     app.post '/channels' do
       blocks, key = @request_payload['blocks'], @request_payload['key']
       number = @request_payload['number']
+
+      user = User.find_by(number: number)
+      halt_with_error 404, 'User not found.' unless user
+
       channel = Channel.new(key: key, blocks: blocks, number: number)
 
       begin
@@ -35,8 +39,19 @@ module ChannelRoutes
         halt_with_error 422, error.message
       else
         channel.save!
-        channel.serialize
       end
+
+      halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
+
+      halt_with_error 404, 'Channel not found.' unless channel
+      # TODO: request_content must deliver key in channel as well
+      user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
+        # TODO: Resque.enqueue NotificationJob, device: device, channel: channel
+      	NotificationJob.perform(device: device, channel: channel)
+      end
+      response.headers['Access-Control-Allow-Origin'] = '*'
+
+      channel.serialize
     end
 
     app.get '/channels/:id' do
@@ -78,17 +93,6 @@ module ChannelRoutes
     end
 
     app.put '/channels/:id/request_content' do
-      user = User.find_by(number: @request_payload['number'])
-      halt_with_error 404, 'User not found.' unless user
-      halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
-
-      channel = Channel.find(params[:id])
-      halt_with_error 404, 'Channel not found.' unless channel
-      # TODO: request_content must deliver key in channel as well
-      user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
-        # TODO: Resque.enqueue NotificationJob, device: device, channel: channel
-      	NotificationJob.perform(device: device, channel: channel)
-      end
 
       204
     end
