@@ -43,7 +43,6 @@ module ChannelRoutes
 
       halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
 
-      halt_with_error 404, 'Channel not found.' unless channel
       # TODO: request_content must deliver key in channel as well
       user.devices.each do |device| #keep for loop structure because in highly concurrent situation better this way
         # TODO: Resque.enqueue NotificationJob, device: device, channel: channel
