@@ -1,7 +1,14 @@
+require 'bson'
+
 require_relative '../models/actor.rb'
 
 module ActorRoutes
   def self.registered(app)
+    ['/actors/:id', '/actors/:id/listen'].each do |pattern|
+      app.before pattern do
+        @oid = BSON::ObjectId.from_string(params[:id])
+      end
+    end
     app.post '/actors' do
       actor = Actor.new(key: @request_payload['key'])
       actor.save!
