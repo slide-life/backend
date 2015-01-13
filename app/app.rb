@@ -6,6 +6,7 @@ require 'logger'
 require_relative 'routes/channel'
 require_relative 'routes/user'
 require_relative 'routes/block'
+require_relative 'routes/actor'
 
 # Initializers
 require_relative 'initializers/json'
@@ -17,6 +18,7 @@ module Sinatra
     register ChannelRoutes
     register UserRoutes
     register BlockRoutes
+    register ActorRoutes
 
     def halt_with_error(status, message)
       halt status, { error: message }.to_json

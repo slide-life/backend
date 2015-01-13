@@ -91,11 +91,6 @@ module ChannelRoutes
         end
       end
     end
-
-    app.put '/channels/:id/request_content' do
-
-      204
-    end
   end
 end
 
