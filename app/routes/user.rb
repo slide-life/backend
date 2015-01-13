@@ -19,6 +19,23 @@ module UserRoutes
       user = User.find_by(number: params[:number])
       { number: user.number, public_key: user.public_key }.to_json
     end
+
+    app.get '/users/:number/profile' do
+      number = params[:number]
+      user = User.find_by(number: number)
+      profile = Conversation.where(downstream: number).map {|conv|
+        conv.upstreams.map {|patch|
+          { patch: patch, key: conv['key'] }
+        }
+      }.flatten.reduce({}) {|store, unit|
+        unit[:patch]['fields'].each {|k, v|
+          store[k] ||= []
+          store[k] << { value: v, key: unit[:key] }
+        }
+        store
+      }
+      profile.to_json
+    end
   end
 end
 
