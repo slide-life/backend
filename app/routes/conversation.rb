@@ -26,6 +26,11 @@ module ConversationRoutes
     app.put '/conversations/:id' do
       conversation = Conversation.find(params[:id])
       conversation.upstream! @request_payload
+
+      # NB: assumes downstream is User
+      user = User.find_by(number: conversation.downstream)
+      user.patch! @request_payload['patch']
+
       conversation.to_json
     end
 
