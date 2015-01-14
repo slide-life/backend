@@ -11,8 +11,7 @@ class User
 
   def patch!(patch)
     patch.each {|k,v|
-      self.profile[k] ||= []
-      self.profile[k] << v
+      self.profile[k] = v
     }
     save!
   end
