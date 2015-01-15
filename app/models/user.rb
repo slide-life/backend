@@ -9,8 +9,8 @@ class User
   has_many :relationships
 
   def add_device(params)
-    device = Device.new(registration_id: params['registration_id'],
-                        type: params['type'].to_sym)
+    device = Device.new(registration_id: params[:registration_id],
+                        device_type: params[:device_type].to_sym)
     device.save!
     self.devices << device
     save!

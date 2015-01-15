@@ -2,13 +2,16 @@ require 'mongoid'
 
 class Device
   include Mongoid::Document
+  include Mongoid::Enum
   field :registration_id
-  enum :type, [:android, :iphone]
+  enum :device_type, [:android, :iphone]
   belongs_to :user
 
   def push(title, data)
-    case :type
+    case self.device_type
       when :android
+        options = { data: { type: '0', json: data.to_json }, collapse_key: 'slide_request' }
+        response = GCMInstance.send([self.registration_id], options)
       when :iphone
         notification = Houston::Notification.new(device: registration_id)
         notification.alert = title

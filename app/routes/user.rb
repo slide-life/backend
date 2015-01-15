@@ -5,13 +5,15 @@ module UserRoutes
     app.post '/users' do
       user = User.create!(number: @request_payload['user'],
                           public_key: @request_payload['public_key'])
-      user.add_device(@request_payload['device'])
+      device = @request_payload['device']
+      user.add_device(registration_id: device['registration_id'],
+                      device_type: device['type'])
       user.to_json
     end
 
     app.get '/users/:number/exists' do
       user = User.find_by(number: params[:number])
-      { status: user.nil? }.to_json
+      { status: !(user.nil?) }.to_json
     end
 
     app.get '/users/:number/public_key' do

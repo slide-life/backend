@@ -7,7 +7,7 @@ module DeviceRoutes
       halt_with_error 404, 'User not found.' unless user
 
       user.add_device(registration_id: @request_payload['registration_id'],
-                      type: @request_payload['type'])
+                      device_type: @request_payload['type'])
       user.to_json
     end
   end

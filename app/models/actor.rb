@@ -15,7 +15,7 @@ class Actor
 
   def notify(payload)
     self.endpoints.each do |endpoint|
-      endpoint.notify(payload)
+      endpoint.stream(payload)
     end
   end
 
