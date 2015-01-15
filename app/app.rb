@@ -8,6 +8,7 @@ require_relative 'routes/user'
 require_relative 'routes/block'
 require_relative 'routes/actor'
 require_relative 'routes/conversation'
+require_relative 'routes/device'
 
 # Initializers
 require_relative 'initializers/json'
