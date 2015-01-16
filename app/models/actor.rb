@@ -2,15 +2,21 @@ class Actor
   include Mongoid::Document
   field :key, type: String
   field :responses, type: Array, default: []
+  has_many :endpoints
 
-  @@Sockets = {}
   def listen(ws)
-    @@Sockets[self._id] = ws
+    endpoint = Endpoint.new(method: :ws)
+    endpoint.listen(ws)
+    endpoint.save!
+
+    self.endpoints << endpoint
+    save!
   end
 
   def notify(payload)
-    socket = @@Sockets[self._id]
-    socket.send(payload) if socket
+    self.endpoints.each do |endpoint|
+      endpoint.stream(payload)
+    end
   end
 
   def stream(payload)

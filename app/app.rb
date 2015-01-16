@@ -3,11 +3,12 @@ require 'sinatra-websocket'
 require 'json'
 require 'logger'
 
-require_relative 'routes/channel'
-require_relative 'routes/user'
-require_relative 'routes/block'
-require_relative 'routes/actor'
-require_relative 'routes/conversation'
+
+MODELS = [:channel, :user, :block, :actor, :conversation, :device, :endpoint, :relationship, :vendor]
+
+MODELS.each do |model_name|
+  require_relative "routes/#{model_name.to_s}"
+end
 
 # Initializers
 require_relative 'initializers/json'
@@ -16,11 +17,14 @@ require_relative 'initializers/resque'
 
 module Sinatra
   class App < Sinatra::Application
-    register ChannelRoutes
-    register UserRoutes
-    register BlockRoutes
-    register ActorRoutes
-    register ConversationRoutes
+    def self.register_model(model)
+      constant_name = model.to_s.camelize
+      register(const_get(constant_name + "Routes"))
+    end
+
+    MODELS.each do |model_name|
+      register_model(model_name)
+    end
 
     def halt_with_error(status, message)
       halt status, { error: message }.to_json

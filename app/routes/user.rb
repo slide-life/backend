@@ -2,21 +2,19 @@ require_relative '../models/user'
 
 module UserRoutes
   def self.registered(app)
-    app.put '/users/:number/add_device' do
-      user = User.find_by(number: params[:number])
-      halt_with_error 404, 'User not found.' unless user
-
-      user.update(devices: user.devices + [@request_payload['device']])
+    app.post '/users' do
+      user = User.create!(number: @request_payload['user'],
+                          public_key: @request_payload['public_key'],
+                          key: @request_payload['key'])
+      device = @request_payload['device']
+      user.add_device(registration_id: device['registration_id'],
+                      device_type: device['type'])
       user.to_json
     end
 
-    app.post '/users' do
-      user = User.create!(
-        number: @request_payload['user'],
-        devices: [@request_payload['device']],
-        key: @request_payload['key'],
-        public_key: @request_payload['public_key'])
-      user.to_json
+    app.get '/users/:number/exists' do
+      user = User.find_by(number: params[:number])
+      { status: !(user.nil?) }.to_json
     end
 
     app.get '/users/:number/public_key' do

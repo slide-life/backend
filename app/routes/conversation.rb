@@ -5,20 +5,16 @@ module ConversationRoutes
     @queue = :default
 
     def self.perform(params)
-      notification = Houston::Notification.new(device: params[:device])
-      notification.alert = params[:title]
-      notification.custom_data = {
+      params[:device].push(params[:title], {
         conversation: params[:conversation],
         blocks: params[:blocks]
-      }
-      APN.push(notification)
+      })
     end
   end
 
   def self.registered(app)
     app.post '/conversations' do
-      key, upstream, downstream = @request_payload['key'], @request_payload['upstream'], @request_payload['downstream']
-      conversation = Conversation.new(key: key, upstream: upstream, downstream: downstream)
+      conversation = Conversation.new(@request_payload)
       conversation.save!
       conversation.to_json
     end

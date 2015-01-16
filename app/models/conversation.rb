@@ -5,6 +5,8 @@ class Conversation
   field :key, type: String
   field :upstreams, type: Array, default: []
   field :downstreams, type: Array, default: []
+  field :name, type: String
+  field :description, type: String
 
   def upstream!(payload)
     self.upstreams << payload
