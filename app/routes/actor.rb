@@ -9,6 +9,7 @@ module ActorRoutes
         @oid = BSON::ObjectId.from_string(params[:id])
       end
     end
+
     app.post '/actors' do
       actor = Actor.new(key: @request_payload['key'])
       actor.save!
@@ -24,13 +25,6 @@ module ActorRoutes
           actor.listen(ws)
         end
       end
-    end
-
-    app.post '/actors/:id' do
-      actor = Actor.find(@oid)
-      halt_with_error 404, 'Actor not found.' unless actor
-      actor.stream @request_payload
-      actor.to_json
     end
   end
 end

@@ -45,13 +45,17 @@ class Endpoint
           socket.send(payload) if socket
         end
       when :method_proc
-        if verb == :verb_publish
+        if verb == :verb_post
           p = @@Procs[self._id]
           p.call(payload) if p
         end
       when :method_device
         if verb == :verb_request
-          NotificationJob.perform(payload)
+          NotificationJob.perform(
+            device: self.device,
+            conversation: payload[:conversation],
+            blocks: payload[:blocks],
+            title: "New data request")
         end
       else
         #do nothing

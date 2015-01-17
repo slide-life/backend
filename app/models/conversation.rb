@@ -16,7 +16,9 @@ class Conversation
   end
 
   def request_content!(user, blocks)
-    user.notify(self, blocks)
+    user.notify(:verb_request, {
+      conversation: self, blocks: blocks
+    })
   end
 end
 
