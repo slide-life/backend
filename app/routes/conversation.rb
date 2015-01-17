@@ -46,6 +46,27 @@ module ConversationRoutes
 
       if downstream.is_a? User
         conversation.request_content! downstream, blocks
+      else
+        # TODO: requests of actors
+      end
+
+      conversation.to_json
+    end
+
+    app.post '/conversations/:id/deposit_content' do
+      conversation = Conversation.find(params[:id])
+      fields = @request_payload['fields']
+      halt_with_error 404, 'Conversation not found.' unless conversation
+
+      downstream = conversation.downstream
+      halt_with_error 404, 'Downstream not found.' unless downstream
+      halt_with_error 422, 'Downstream does not have an endpoint registered.' if downstream.endpoints.empty?
+
+      if downstream.is_a? User
+        conversation.deposit_content! downstream, fields
+      else
+        # TODO: deposits to actors
+        actor.deposit_content! downstream, fields
       end
 
       conversation.to_json

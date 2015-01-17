@@ -14,11 +14,8 @@ class Endpoint
   module NotificationJob
     @queue = :default
 
-    def self.perform(params)
-      params[:device].push(params[:title], {
-        conversation: params[:conversation],
-        blocks: params[:blocks]
-      })
+    def self.perform(device, title, params)
+      device.push(title, params)
     end
   end
 
@@ -52,10 +49,18 @@ class Endpoint
       when :method_device
         if verb == :verb_request
           NotificationJob.perform(
-            device: self.device,
-            conversation: payload[:conversation],
-            blocks: payload[:blocks],
-            title: "New data request")
+            self.device,
+            "New data request",
+            { conversation: payload[:conversation],
+              blocks: payload[:blocks],
+              verb: verb })
+        else
+          NotificationJob.perform(
+            self.device,
+            "New data deposit",
+            { conversation: payload[:conversation],
+              verb: verb,
+              fields: payload[:fields] })
         end
       else
         #do nothing

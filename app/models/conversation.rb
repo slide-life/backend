@@ -20,5 +20,11 @@ class Conversation
       conversation: self, blocks: blocks
     })
   end
+
+  def deposit_content!(user, fields)
+    user.notify(:verb_post, {
+      conversation: self, fields: fields
+    })
+  end
 end
 
