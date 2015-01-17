@@ -1,20 +1,24 @@
+require 'bson'
 require_relative '../models/conversation.rb'
 
 module ConversationRoutes
-  module NotificationJob
-    @queue = :default
-
-    def self.perform(params)
-      params[:device].push(params[:title], {
-        conversation: params[:conversation],
-        blocks: params[:blocks]
-      })
+  def self.get_entity(entity)
+    if entity['type'] == 'user'
+      User.find_by(entity['number'])
+    else
+      Actor.find(BSON::ObjectId.from_string(entity['id']))
     end
   end
 
   def self.registered(app)
     app.post '/conversations' do
-      conversation = Conversation.new(@request_payload)
+      payload = @request_payload
+      upstream, downstream = ConversationRoutes.get_entity(payload['upstream']), ConversationRoutes.get_entity(payload['downstream'])
+      conversation = Conversation.new(key: payload['key'],
+        name: payload['name'],
+        description: payload['description'],
+        upstream: upstream,
+        downstream: downstream)
       conversation.save!
       conversation.to_json
     end
@@ -23,9 +27,10 @@ module ConversationRoutes
       conversation = Conversation.find(params[:id])
       conversation.upstream! @request_payload
 
-      # NB: assumes downstream is User
-      user = User.find_by(number: conversation.downstream)
-      user.patch! @request_payload['patch']
+      downstream = conversation.downstream
+      if downstream.is_a? User
+        conversation.downstream.patch! @request_payload['patch']
+      end
 
       conversation.to_json
     end
@@ -35,18 +40,12 @@ module ConversationRoutes
       blocks = @request_payload['blocks']
       halt_with_error 404, 'Conversation not found.' unless conversation
 
-      # NB: assuming downstream is a user
-      user = User.find_by(number: conversation.downstream)
-      halt_with_error 404, 'User not found.' unless user
+      downstream = conversation.downstream
+      halt_with_error 404, 'Downstream not found.' unless downstream
+      halt_with_error 422, 'Downstream does not have an endpoint registered.' if downstream.endpoints.empty?
 
-      halt_with_error 422, 'User does not have a device registered.' if user.devices.empty?
-
-      user.devices.each do |device|
-        NotificationJob.perform(
-          device: device,
-          conversation: conversation,
-          blocks: blocks,
-          title: "New data request")
+      if downstream.is_a? User
+        conversation.request_content! downstream, blocks
       end
 
       conversation.to_json

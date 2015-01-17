@@ -6,6 +6,7 @@ class Device
   field :registration_id
   enum :device_type, [:android, :ios]
   belongs_to :user
+  belongs_to :endpoint
 
   def push(title, data)
     case self.device_type
