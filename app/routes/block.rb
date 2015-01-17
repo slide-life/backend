@@ -59,7 +59,10 @@ end
 module BlockRoutes
   def self.registered(app)
     app.get '/blocks' do
-      blocks = Block.all[0]
+      organization = params['organization'] || 'slide.life'
+      blocks = Block.find_by(organization: organization)
+      halt_with_error 404, 'Organisation not found' if blocks.nil?
+
       fields = {}
       flatten blocks.organization, blocks.schema, ':', fields
       fields.keys.each { |key| resolve_inheritance(key, fields) }
