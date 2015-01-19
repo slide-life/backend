@@ -37,10 +37,8 @@ class Endpoint
   def stream(verb, payload)
     case self.method
       when :method_ws
-        if verb == :verb_post
-          socket = @@Sockets[self._id]
-          socket.send(payload) if socket
-        end
+        socket = @@Sockets[self._id]
+        socket.send({verb: verb, payload: payload}.to_json) if socket
       when :method_proc
         if verb == :verb_post
           p = @@Procs[self._id]

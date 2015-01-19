@@ -14,7 +14,7 @@ class Actor < Observable
   def stream(payload)
     self.responses << payload
     save!
-    notify(:verb_post, payload.to_json)
+    notify(:verb_post, payload)
   end
 end
 

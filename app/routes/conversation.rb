@@ -44,11 +44,7 @@ module ConversationRoutes
       halt_with_error 404, 'Downstream not found.' unless downstream
       halt_with_error 422, 'Downstream does not have an endpoint registered.' if downstream.endpoints.empty?
 
-      if downstream.is_a? User
-        conversation.request_content! downstream, blocks
-      else
-        # TODO: requests of actors
-      end
+      conversation.request_content! downstream, blocks
 
       conversation.to_json
     end
