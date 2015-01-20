@@ -22,6 +22,7 @@ class Vendor < Recordable
     Hash[
       self.profile['_responses'].map do |user, dict|
         [user, Hash[
+          [['_key', self.profile['_keys'][user]]] +
           form_fields.
             select { |f| ! dict[f].nil? }.
             map { |field| [
