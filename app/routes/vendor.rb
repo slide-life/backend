@@ -8,6 +8,12 @@ module VendorRoutes
       vendor.profile.to_json
     end
 
+    app.get '/vendors/:id/public_key' do
+      vendor = Vendor.find(params[:id])
+
+      { public_key: vendor.public_key }.to_json
+    end
+
     app.put '/vendors/:id' do
       vendor = Vendor.find(params[:id])
       halt_with_error 403, 'Invalid invite code.' unless vendor.check_invite_code(params['invite_code'])
