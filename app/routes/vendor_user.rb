@@ -11,10 +11,7 @@ module VendorUserRoutes
         checksum: @request_payload['checksum']
       })
       vendor_user.save!
-      vendor.patch!({
-        '_keys' => { vendor_user.uuid => vendor_user.key },
-        '_vendor_keys' => { vendor_user.uuid => @request_payload['vendor_key'] }
-      })
+      vendor.patch_key!(vendor_user, vendor_user.key, @request_payload['vendor_key'])
 
       vendor_user.to_json
     end
@@ -23,11 +20,23 @@ module VendorUserRoutes
       vendor = Vendor.find(params[:id])
       vendor_user = VendorUser.find(params[:user_id])
 
+      vendor_user.vendor_profile.to_json
+    end
+
+    app.get '/vendors/:id/vendor_users/:user_id/latest_profile' do
+      vendor = Vendor.find(params[:id])
+      vendor_user = VendorUser.find(params[:user_id])
+
+      vendor_user.vendor_latest_profile.to_json
+    end
+
+    app.get '/vendor_users/:user_id/profile' do
+      vendor_user = VendorUser.find(params[:user_id])
+
       vendor_user.profile.to_json
     end
 
-    app.patch '/vendors/:id/vendor_users/:user_id' do
-      vendor = Vendor.find(params[:id])
+    app.patch '/vendor_users/:user_id/profile' do
       vendor_user = VendorUser.find(params[:user_id])
       vendor_user.patch! @request_payload['patch']
 

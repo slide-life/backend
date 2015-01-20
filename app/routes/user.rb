@@ -9,6 +9,11 @@ module UserRoutes
       user.to_json
     end
 
+    app.patch '/users/:number/profile' do
+      user = User.find_by(number: params[:number])
+      user.patch! @request_payload['patch']
+    end
+
     app.put '/users/:number/devices' do
       user.add_device(registration_id: @request_payload['registration_id'],
                       device_type: @request_payload['type'])
