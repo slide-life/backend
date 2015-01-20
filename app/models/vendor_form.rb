@@ -1,7 +1,7 @@
 require 'mongoid'
+require_relative 'observable'
 
 class VendorForm < Observable
-  include Mongoid::Document
   field :name, type: String
   field :description, type: String
   field :form_fields, type: Array
@@ -16,6 +16,10 @@ class VendorForm < Observable
 
   def responses
     self.vendor.get_responses(self)
+  end
+
+  def public_key
+    self.vendor.public_key
   end
 
   protected

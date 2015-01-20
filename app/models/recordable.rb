@@ -1,7 +1,7 @@
 require 'mongoid'
-require_relative 'observable'
+require_relative 'securable'
 
-class Recordable < Observable
+class Recordable < Securable
   field :profile, type: Hash, default: {}
   field :checksum, type: String
 

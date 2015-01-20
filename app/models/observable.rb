@@ -5,8 +5,6 @@ class Observable
   has_many :endpoints, as: :entity
   has_many :upstream_conversations, class_name: "Conversation", as: :upstream_entity
   has_many :downstream_conversations, class_name: "Conversation", as: :downstream_entity
-  field :key, type: String
-  field :public_key, type: String
 
   def add_device(params)
     device = Endpoint.Device(registration_id: params[:registration_id],
