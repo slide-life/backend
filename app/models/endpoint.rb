@@ -15,6 +15,8 @@ class Endpoint
   belongs_to :entity, polymorphic: true
   has_one :device
 
+  validates_presence_of :method
+
   after_create :initialize_payload_proc
 
   @@Sockets = {}

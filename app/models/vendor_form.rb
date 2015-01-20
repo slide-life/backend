@@ -7,6 +7,9 @@ class VendorForm < Observable
   field :form_fields, type: Array
   belongs_to :vendor
 
+  validates_presence_of :name
+  validates_presence_of :form_fields
+
   after_create :add_patch_callbacks
 
   def responses
@@ -23,7 +26,7 @@ class VendorForm < Observable
       Proc.new do |payload|
         #user callback
         user_id = payload['patch'].keys.first
-        vendor_user = VendorUser.find(hashed_name: user_id)
+        vendor_user = VendorUser.find(uuid: user_id)
         vendor_user.patch!(payload['patch'][user_id])
       end, Proc.new do |payload|
         self.vendor.patch!(payload['patch'])

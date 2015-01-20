@@ -5,14 +5,15 @@ module VendorUserRoutes
     app.post '/vendors/:id/vendor_users' do
       vendor = Vendor.find(params[:id])
       #TODO: invite code or some form of authentication
-      vendor_user = vendor.vendor_users.build hashed_name: @request_payload['hashed_name'],
+      vendor_user = vendor.vendor_users.build ({
         key: @request_payload['key'],
         public_key: @request_payload['public_key'],
         checksum: @request_payload['checksum']
+      })
       vendor_user.save!
       vendor.patch!({
-        '_keys' => { vendor_user.hashed_name => vendor_user.key },
-        '_vendor_keys' => { vendor_user.hashed_name => @request_payload['vendor_key'] }
+        '_keys' => { vendor_user.uuid => vendor_user.key },
+        '_vendor_keys' => { vendor_user.uuid => @request_payload['vendor_key'] }
       })
 
       vendor_user.to_json

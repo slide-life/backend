@@ -8,6 +8,9 @@ class Device
   belongs_to :user
   belongs_to :endpoint
 
+  validates_presence_of :registration_id
+  validates_presence_of :device_type
+
   def push(title, data)
     case self.device_type
       when :android

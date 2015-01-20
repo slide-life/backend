@@ -5,6 +5,8 @@ class Recordable < Observable
   field :profile, type: Hash, default: {}
   field :checksum, type: String
 
+  validates_presence_of :profile
+
   after_create :add_patch_listener
 
   def patch!(patch)
