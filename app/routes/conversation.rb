@@ -20,7 +20,8 @@ module ConversationRoutes
         upstream: upstream,
         downstream: downstream)
       conversation.save!
-      conversation.to_json
+
+      conversation.serialize
     end
 
     app.put '/conversations/:id' do
@@ -32,7 +33,7 @@ module ConversationRoutes
         conversation.downstream.patch! @request_payload['patch']
       end
 
-      conversation.to_json
+      conversation.serialize
     end
 
     app.post '/conversations/:id/request_content' do
@@ -46,7 +47,7 @@ module ConversationRoutes
 
       conversation.request_content! downstream, blocks
 
-      conversation.to_json
+      conversation.serialize
     end
 
     app.post '/conversations/:id/deposit_content' do
@@ -65,7 +66,7 @@ module ConversationRoutes
         actor.deposit_content! downstream, fields
       end
 
-      conversation.to_json
+      conversation.serialize
     end
   end
 end

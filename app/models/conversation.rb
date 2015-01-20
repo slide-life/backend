@@ -27,5 +27,15 @@ class Conversation
       conversation: self, fields: fields
     })
   end
+
+  def serialize
+    self.to_json(
+      if self.downstream.is_a? User
+        { include: { downstream: { only: [:number] } } }
+      else
+        {}
+      end
+    )
+  end
 end
 
