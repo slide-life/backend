@@ -8,6 +8,7 @@ module AdminRoutes
         description: @request_payload['description'],
         invite_code: invite_code
 
+      vendor.save!
       vendor.to_json
     end
   end

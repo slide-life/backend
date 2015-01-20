@@ -16,7 +16,7 @@ module VendorRoutes
 
     app.put '/vendors/:id' do
       vendor = Vendor.find(params[:id])
-      halt_with_error 403, 'Invalid invite code.' unless vendor.check_invite_code(params['invite_code'])
+      halt_with_error 403, 'Invalid invite code.' unless vendor.check_invite_code(@request_payload['invite_code'])
 
       vendor.update! key: @request_payload['key'],
         public_key: @request_payload['public_key'],
