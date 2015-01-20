@@ -2,7 +2,7 @@ require_relative '../models/vendor'
 
 module VendorRoutes
   def self.registered(app)
-    app.get '/vendors/:id' do
+    app.get '/vendors/:id/profile' do
       vendor = Vendor.find(params[:id])
 
       vendor.profile.to_json

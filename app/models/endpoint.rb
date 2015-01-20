@@ -17,8 +17,6 @@ class Endpoint
 
   validates_presence_of :method
 
-  after_create :initialize_payload_proc
-
   @@Sockets = {}
   @@Procs = {}
   @@PayloadProcs = {}
@@ -35,7 +33,7 @@ class Endpoint
     endpoint = Endpoint.new(method: :method_device)
     endpoint.device = Device.new(device)
     endpoint.device.save!
-    return endpoint
+    endpoint
   end
 
   def self.new_with_ws(ws)
@@ -63,7 +61,7 @@ class Endpoint
   end
 
   def stream(verb, p)
-    payload = @@PayloadProcs[self._id].call(p)
+    payload = @@PayloadProcs.fetch(self._id, Proc.new {|x| x}).call(p)
     case self.method
       when :method_ws
         socket = @@Sockets[self._id]
@@ -103,10 +101,5 @@ class Endpoint
         #TODO: :method_put, :method_post, :method_patch
         #do nothing
     end
-  end
-
-  protected
-  def initialize_payload_proc
-    @@PayloadProcs[self._id] = Proc.new { |p| p }
   end
 end

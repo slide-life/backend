@@ -19,7 +19,7 @@ module VendorUserRoutes
       vendor_user.to_json
     end
 
-    app.get '/vendors/:id/vendor_users/:user_id' do
+    app.get '/vendors/:id/vendor_users/:user_id/profile' do
       vendor = Vendor.find(params[:id])
       vendor_user = VendorUser.find(params[:user_id])
 

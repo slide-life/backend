@@ -35,12 +35,11 @@ module UserRoutes
       halt_with_error 404, 'User not found.' unless user
       halt_with_error 422, 'No websocket.' unless request.websocket?
       request.websocket do |ws|
-        endpoint = nil
         ws.onopen do
           endpoint = user.listen(ws)
-        end
-        ws.onclose do
-          user.unlisten endpoint
+          ws.onclose do
+            user.unlisten endpoint
+          end
         end
       end
     end
