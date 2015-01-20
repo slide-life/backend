@@ -29,13 +29,12 @@ module UserRoutes
     end
 
     app.get '/users/:number/profile' do
-      number = params[:number]
-      user = User.find_by(number: number)
+      user = User.find_by(number: params[:number])
       user.profile.to_json
     end
 
     app.get '/users/:number/listen' do
-      user = User.find(params[:number])
+      user = User.find_by(number: params[:number])
       halt_with_error 404, 'User not found.' unless user
       halt_with_error 422, 'No websocket.' unless request.websocket?
       request.websocket do |ws|

@@ -4,7 +4,12 @@ class Endpoint
   include Mongoid::Document
   include Mongoid::Enum
   field :url, type: String
-  enum :method, [:method_ws, :method_post, :method_put, :method_proc, :method_device]
+  enum :method, [:method_ws,
+                 :method_post,
+                 :method_put,
+                 :method_patch,
+                 :method_proc,
+                 :method_device]
   belongs_to :entity, polymorphic: true
   has_one :device
 
@@ -24,6 +29,18 @@ class Endpoint
     endpoint.device = Device.new(device)
     endpoint.device.save!
     return endpoint
+  end
+
+  def self.new_with_ws(ws)
+    ret = self.new(method: :method_ws)
+    ret.listen(ws)
+    ret
+  end
+
+  def self.new_with_proc(p)
+    ret = self.new(method: :method_proc)
+    ret.listen_with_proc(p)
+    ret
   end
 
   def listen(ws)
@@ -61,6 +78,7 @@ class Endpoint
               fields: payload[:fields] })
         end
       else
+        #TODO: :method_put, :method_post, :method_patch
         #do nothing
     end
   end

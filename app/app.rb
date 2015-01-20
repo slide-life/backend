@@ -3,10 +3,20 @@ require 'sinatra-websocket'
 require 'json'
 require 'logger'
 
+ROUTES = [
+  :admin,
+  :user,
+  :block,
+  :actor,
+  :conversation,
+  :device,
+  :endpoint,
+  :relationship,
+  :vendor,
+  :vendor_form
+]
 
-MODELS = [:channel, :user, :block, :actor, :conversation, :device, :endpoint, :relationship, :vendor]
-
-MODELS.each do |model_name|
+ROUTES.each do |model_name|
   require_relative "routes/#{model_name.to_s}"
 end
 
@@ -22,7 +32,7 @@ module Sinatra
       register(const_get(constant_name + "Routes"))
     end
 
-    MODELS.each do |model_name|
+    ROUTES.each do |model_name|
       register_model(model_name)
     end
 
