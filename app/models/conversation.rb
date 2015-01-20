@@ -8,6 +8,10 @@ class Conversation
   belongs_to :upstream, polymorphic: true 
   belongs_to :downstream, polymorphic: true 
 
+  validates_presence_of :key
+  validates_associated :upstream
+  validates_associated :downstream
+
   def upstream!(payload)
     self.upstreams << payload
     save!
@@ -29,13 +33,12 @@ class Conversation
   end
 
   def serialize
-    self.to_json(
-      if self.downstream.is_a? User
-        { include: { downstream: { only: [:number] } } }
-      else
-        {}
-      end
-    )
+    params = {}
+    params[:include] = {}
+    params[:include][:downstream] = { only: [:number] } if self.downstream.is_a? User
+    params[:include][:upstream] = { only: [:number] } if self.upstream.is_a User
+
+    self.to_json params
   end
 end
 
