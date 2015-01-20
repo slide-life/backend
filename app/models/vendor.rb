@@ -2,13 +2,13 @@ require 'mongoid'
 require_relative 'recordable'
 
 class Vendor < Recordable
-  include Mongoid::Document
   field :name, type: String
   field :description, type: String
   field :invite_code, type: String
-  field :checksum, type: String
   has_many :relationships
   has_many :vendor_forms
+  has_many :vendor_users
+  has_many :vendor_user_lists #TODO: get routes working for this
 
   def check_invite_code(ic)
     self.invite_code == ic

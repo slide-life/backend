@@ -3,6 +3,7 @@ require_relative 'observable'
 
 class Recordable < Observable
   field :profile, type: Hash, default: {}
+  field :checksum, type: String
 
   after_create :add_patch_listener
 
