@@ -28,5 +28,14 @@ module VendorFormRoutes
       vendor_form = VendorForm.find(params[:form_id])
       vendor_form.to_json methods: [:responses, :public_key]
     end
+
+    app.delete '/vendors/:id/vendor_forms/:form_id' do
+      vendor = Vendor.find(params[:id])
+      halt_with_error 403, 'Forbidden checksum.' unless vendor.check_checksum(@request_payload['checksum'])
+
+      vendor_form = VendorForm.find(params[:form_id])
+
+      vendor_form.delete!
+    end
   end
 end
