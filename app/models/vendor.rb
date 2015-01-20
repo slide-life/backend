@@ -11,9 +11,9 @@ class Vendor < Recordable
   has_many :vendor_user_lists #TODO: get routes working for this
 
   validates_presence_of :name
-  validates_presence_of :invite_code
+  validates_presence_of :invite_code, on: :create
 
-  before_create :initialize_invite_code
+  before_validation :initialize_invite_code
 
   def check_invite_code(ic)
     self.invite_code == ic
@@ -73,5 +73,6 @@ class Vendor < Recordable
   protected
   def initialize_invite_code
     self.invite_code = (0...16).map{65.+(rand(25)).chr}.join
+    puts "invite code initialized: #{self.invite_code}"
   end
 end

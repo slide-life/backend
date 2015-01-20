@@ -8,7 +8,7 @@ class VendorUser < Recordable
 
   validates_presence_of :uuid, on: :create
 
-  before_create :initialize_uuid
+  before_validation :initialize_uuid
 
   def vendor_profile
     self.vendor.profile_for(self.uuid)
