@@ -24,6 +24,11 @@ class Observable
     save!
   end
 
+  def unlisten(endpoint)
+    self.endpoints.delete endpoint
+    save!
+  end
+
   def notify(verb, payload)
     self.endpoints.each do |endpoint|
       endpoint.stream(verb, payload)

@@ -6,9 +6,6 @@ module UserRoutes
       user = User.create!(number: @request_payload['user'],
                           public_key: @request_payload['public_key'],
                           key: @request_payload['key'])
-      device = @request_payload['device']
-      user.add_device(registration_id: device['registration_id'],
-                      device_type: device['type'])
       user.to_json
     end
 
@@ -38,8 +35,12 @@ module UserRoutes
       halt_with_error 404, 'User not found.' unless user
       halt_with_error 422, 'No websocket.' unless request.websocket?
       request.websocket do |ws|
+        endpoint = nil
         ws.onopen do
-          user.listen(ws)
+          endpoint = user.listen(ws)
+        end
+        ws.onclose do
+          user.unlisten endpoint
         end
       end
     end

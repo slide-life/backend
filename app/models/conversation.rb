@@ -16,6 +16,7 @@ class Conversation
   end
 
   def request_content!(user, blocks)
+    # TODO: self needs to carry along downstream/upstream number
     user.notify(:verb_request, {
       conversation: self, blocks: blocks
     })
