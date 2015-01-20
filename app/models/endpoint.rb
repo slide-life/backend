@@ -1,4 +1,6 @@
 require 'mongoid'
+require 'net/http'
+require 'uri'
 
 class Endpoint
   include Mongoid::Document
@@ -13,8 +15,11 @@ class Endpoint
   belongs_to :entity, polymorphic: true
   has_one :device
 
+  after_create :initialize_payload_proc
+
   @@Sockets = {}
   @@Procs = {}
+  @@PayloadProcs = {}
 
   module NotificationJob
     @queue = :default
@@ -51,7 +56,12 @@ class Endpoint
     @@Procs[self._id] = p
   end
 
-  def stream(verb, payload)
+  def process_payload_with_proc(p)
+    @@PayloadProcs[self._id] = p
+  end
+
+  def stream(verb, p)
+    payload = @@PayloadProcs[self._id].call(p)
     case self.method
       when :method_ws
         socket = @@Sockets[self._id]
@@ -77,9 +87,24 @@ class Endpoint
               verb: verb,
               fields: payload[:fields] })
         end
+      when :method_post, :method_put, :method_patch
+        uri = URI.parse(url)
+        request = {
+          method_post: Net::HTTP::Post,
+          method_put: Net::HTTP::Put,
+          method_patch: Net::HTTP::Patch
+        }[self.method].new(uri.request_uri)
+        request["Content-Type"] = "application/json"
+        http = Net::HTTP.new(uri.host, uri.port)
+        response = http.request(request)
       else
         #TODO: :method_put, :method_post, :method_patch
         #do nothing
     end
+  end
+
+  protected
+  def initialize_payload_proc
+    @@PayloadProcs[self._id] = Proc.new { |p| p }
   end
 end

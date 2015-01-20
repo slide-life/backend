@@ -10,6 +10,10 @@ module VendorUserRoutes
         public_key: @request_payload['public_key'],
         checksum: @request_payload['checksum']
       vendor_user.save!
+      vendor.patch!({
+        '_keys' => { vendor_user.hashed_name => vendor_user.key },
+        '_vendor_keys' => { vendor_user.hashed_name => @request_payload['vendor_key'] }
+      })
 
       vendor_user.to_json
     end

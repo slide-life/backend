@@ -14,7 +14,8 @@ ROUTES = [
   :relationship,
   :vendor,
   :vendor_form,
-  :vendor_user
+  :vendor_user,
+  :vendor_user_list
 ]
 
 ROUTES.each do |model_name|
