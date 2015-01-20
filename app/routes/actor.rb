@@ -22,7 +22,10 @@ module ActorRoutes
       halt_with_error 422, 'No websocket.' unless request.websocket?
       request.websocket do |ws|
         ws.onopen do
-          actor.listen(ws)
+          endpoint = actor.listen(ws)
+          ws.onclose do
+            actor.unlisten endpoint
+          end
         end
       end
     end

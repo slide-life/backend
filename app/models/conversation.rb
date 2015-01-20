@@ -36,7 +36,7 @@ class Conversation
     params = {}
     params[:include] = {}
     params[:include][:downstream] = { only: [:number] } if self.downstream.is_a? User
-    params[:include][:upstream] = { only: [:number] } if self.upstream.is_a User
+    params[:include][:upstream] = { only: [:number] } if self.upstream.is_a? User
 
     self.to_json params
   end

@@ -15,7 +15,7 @@ class VendorForm < Observable
   after_create :add_patch_callbacks
 
   def responses
-    self.vendor.get_responses(self.form_fields)
+    self.vendor.get_responses(self)
   end
 
   protected

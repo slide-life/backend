@@ -22,6 +22,7 @@ class Observable
 
     self.endpoints << endpoint
     save!
+    endpoint
   end
 
   def unlisten(endpoint)
