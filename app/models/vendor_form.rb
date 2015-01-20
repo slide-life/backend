@@ -13,6 +13,10 @@ class VendorForm < Observable
     self.vendor.get_responses(self.form_fields)
   end
 
+  def public_key
+    self.vendor.public_key
+  end
+
   protected
   def add_patch_callbacks
     [

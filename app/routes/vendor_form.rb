@@ -18,7 +18,7 @@ module VendorFormRoutes
         form_fields: @request_payload['form_fields']
       vendor_form.save!
 
-      vendor_form.to_json
+      vendor_form.to_json methods: [:public_key]
     end
 
     app.get '/vendors/:id/vendor_forms/:form_id' do
@@ -26,7 +26,7 @@ module VendorFormRoutes
       halt_with_error 403, 'Forbidden checksum.' unless vendor.check_checksum(@request_payload['checksum'])
 
       vendor_form = VendorForm.find(params[:form_id])
-      vendor_form.to_json methods: :responses
+      vendor_form.to_json methods: [:responses, :public_key]
     end
   end
 end
