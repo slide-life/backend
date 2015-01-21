@@ -24,7 +24,7 @@ class Vendor < Recordable
   end
 
   def vendor_key_for_vendor_user(vendor_user)
-    (self.profile['_vendor_keys'] || {})[vendor_user.uuid]
+    vendor_user.key
   end
 
   def vendor_keys
@@ -41,8 +41,7 @@ class Vendor < Recordable
 
   def patch_key!(vendor_user, user_key, vendor_key)
     self.patch!({
-      '_keys' => { vendor_user.uuid => user_key },
-      '_vendor_keys' => { vendor_user.uuid => vendor_key }
+      '_keys' => { vendor_user.uuid => user_key }
     })
   end
 
