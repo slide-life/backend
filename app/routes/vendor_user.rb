@@ -16,35 +16,35 @@ module VendorUserRoutes
       vendor_user.to_json
     end
 
-    app.get '/vendors/:id/vendor_users/:user_id/profile' do
+    app.get '/vendors/:id/vendor_users/:uuid/profile' do
       vendor = Vendor.find(params[:id])
-      vendor_user = VendorUser.find(params[:user_id])
+      vendor_user = VendorUser.find(params[:uuid])
 
       vendor_user.vendor_profile.to_json
     end
 
-    app.get '/vendors/:id/vendor_users/:user_id/latest_profile' do
+    app.get '/vendors/:id/vendor_users/:uuid/latest_profile' do
       vendor = Vendor.find(params[:id])
-      vendor_user = VendorUser.find(params[:user_id])
+      vendor_user = VendorUser.find_by(uuid: params[:uuid])
 
       vendor_user.vendor_latest_profile.to_json
     end
 
-    app.get '/vendor_users/:user_id/vendor_forms' do
-      vendor_user = VendorUser.find(params[:user_id])
+    app.get '/vendor_users/:uuid/vendor_forms' do
+      vendor_user = VendorUser.find_by(uuid: params[:uuid])
       vendor_forms = vendor_user.vendor_forms
 
       vendor_forms.to_json
     end
 
-    app.get '/vendor_users/:user_id/profile' do
-      vendor_user = VendorUser.find(params[:user_id])
+    app.get '/vendor_users/:uuid/profile' do
+      vendor_user = VendorUser.find_by(uid: params[:uuid])
 
       vendor_user.profile.to_json
     end
 
-    app.patch '/vendor_users/:user_id/profile' do
-      vendor_user = VendorUser.find(params[:user_id])
+    app.patch '/vendor_users/:uuid/profile' do
+      vendor_user = VendorUser.find_by(uuid: params[:uuid])
       vendor_user.patch! @request_payload['patch']
 
       vendor_user.to_json

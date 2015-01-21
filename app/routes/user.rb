@@ -13,6 +13,7 @@ module UserRoutes
     app.patch '/users/:number/profile' do
       user = User.find_by(number: params[:number])
       user.patch! @request_payload['patch']
+      user.to_json
     end
 
     app.put '/users/:number/devices' do
