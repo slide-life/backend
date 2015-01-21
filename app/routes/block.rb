@@ -55,7 +55,6 @@ def resolve(block_schema, name)
 end
 
 def resolve_field(block_schema, name)
-  puts "Resolving field: #{name}"
   real_name = resolve(block_schema, name)
   path = path_of(real_name)
   return separate_path(path).reduce(block_schema) do |memo, obj|
