@@ -22,6 +22,11 @@ class VendorForm < Observable
     self.vendor.public_key
   end
 
+  def stream(payload)
+    # TODO. think about verbs
+    notify(:verb_post, payload)
+  end
+
   protected
   def add_patch_callbacks
     [
@@ -29,7 +34,7 @@ class VendorForm < Observable
         #user callback
 
         user_id = payload['patch'].keys.first
-        vendor_user = VendorUser.find(uuid: user_id)
+        vendor_user = VendorUser.find_by(uuid: user_id)
         vendor_user.patch!(payload['patch'][user_id])
       end, Proc.new do |payload|
         #vendor callback

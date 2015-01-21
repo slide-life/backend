@@ -5,8 +5,10 @@ module ConversationRoutes
   def self.get_entity(entity)
     if entity['type'] == 'user'
       User.find_by(entity['number'])
-    else
+    elsif entity['type'] == 'actor'
       Actor.find(BSON::ObjectId.from_string(entity['id']))
+    else
+      VendorForm.find(BSON::ObjectId.from_string(entity['id']))
     end
   end
 
