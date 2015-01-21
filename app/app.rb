@@ -48,6 +48,7 @@ module Sinatra
       request.body.rewind
       begin
         @request_payload = JSON.parse body unless body == nil or body.length == 0
+        @request_payload ||= {}
       rescue JSON::ParserError
         halt_with_error 400, 'Malformed JSON.'
       end
