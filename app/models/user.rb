@@ -6,5 +6,9 @@ class User < Recordable
   has_many :relationships
 
   validates_presence_of :number
+
+  def encrypted_vendor_users
+    self.profile['_vendor_users']
+  end
 end
 

@@ -15,6 +15,7 @@ module UserRoutes
     end
 
     app.put '/users/:number/devices' do
+      user = User.find_by(number: params[:number])
       user.add_device(registration_id: @request_payload['registration_id'],
                       device_type: @request_payload['type'])
       user.to_json
@@ -33,6 +34,11 @@ module UserRoutes
     app.get '/users/:number/profile' do
       user = User.find_by(number: params[:number])
       user.profile.to_json
+    end
+
+    app.get '/users/:number/vendor_users' do
+      user = User.find_by(number: params[:number])
+      user.encrypted_vendor_users.to_json
     end
 
     app.get '/users/:number/listen' do
