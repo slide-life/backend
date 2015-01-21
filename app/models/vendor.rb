@@ -23,25 +23,17 @@ class Vendor < Recordable
     self.checksum == chk
   end
 
-  def vendor_key_for_vendor_user(vendor_user)
-    vendor_user.key
-  end
-
   def vendor_keys
-    Hash[
-      self.vendor_users.map do |vu|
-        [vu.uuid, self.vendor_key_for_vendor_user(vu)]
-      end
-    ]
+    self.profile['_keys']
   end
 
   def stored_responses
     self.profile['_responses'] || {}
   end
 
-  def patch_key!(vendor_user, user_key, vendor_key)
+  def patch_key!(vendor_user, vendor_key)
     self.patch!({
-      '_keys' => { vendor_user.uuid => user_key }
+      '_keys' => { vendor_user.uuid => vendor_key }
     })
   end
 

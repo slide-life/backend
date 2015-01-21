@@ -8,8 +8,6 @@ class VendorUser < Recordable
 
   validates_presence_of :uuid, on: :create
 
-  before_create :copy_public_key_from_vendor
-
   def vendor_profile
     self.vendor.profile_for(self.uuid)
   end
@@ -20,10 +18,5 @@ class VendorUser < Recordable
 
   def vendor_forms
     self.vendor.vendor_forms
-  end
-
-  protected
-  def copy_public_key_from_vendor
-    self.public_key = self.vendor.public_key
   end
 end

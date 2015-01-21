@@ -7,6 +7,7 @@ module VendorUserRoutes
       #TODO: invite code or some form of authentication
       vendor_user = vendor.vendor_users.build ({
         key: @request_payload['key'],
+        public_key: @request_payload['public_key'],
         checksum: @request_payload['checksum']
       })
       vendor_user.uuid = (0...32).map{65.+(rand(25)).chr}.join
