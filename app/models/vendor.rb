@@ -24,7 +24,7 @@ class Vendor < Recordable
   end
 
   def stored_responses
-    self.profile['_responses']
+    self.profile['_responses'] || {}
   end
 
   def patch_key!(vendor_user, user_key, vendor_key)

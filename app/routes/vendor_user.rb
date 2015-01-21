@@ -38,8 +38,13 @@ module VendorUserRoutes
       vendor_forms.to_json
     end
 
+    app.get '/vendor_users/:uuid' do
+      vendor_user = VendorUser.find_by(uuid: params[:uuid])
+      vendor_user.to_json
+    end
+
     app.get '/vendor_users/:uuid/profile' do
-      vendor_user = VendorUser.find_by(uid: params[:uuid])
+      vendor_user = VendorUser.find_by(uuid: params[:uuid])
 
       vendor_user.profile.to_json
     end

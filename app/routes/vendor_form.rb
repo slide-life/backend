@@ -4,7 +4,7 @@ module VendorFormRoutes
   def self.registered(app)
     app.get '/vendors/:id/vendor_forms' do
       vendor = Vendor.find(params[:id])
-      halt_with_error 403, 'Forbidden checksum.' unless vendor.check_checksum(@request_payload['checksum'])
+      halt_with_error 403, 'Forbidden checksum.' unless vendor.check_checksum(params[:checksum])
 
       vendor.vendor_forms.to_json
     end
@@ -23,7 +23,7 @@ module VendorFormRoutes
 
     app.get '/vendors/:id/vendor_forms/:form_id' do
       vendor = Vendor.find(params[:id])
-      halt_with_error 403, 'Forbidden checksum.' unless vendor.check_checksum(@request_payload['checksum'])
+      halt_with_error 403, 'Forbidden checksum.' unless vendor.check_checksum(params['checksum'])
 
       vendor_form = VendorForm.find(params[:form_id])
       vendor_form.to_json methods: [:responses, :public_key]
