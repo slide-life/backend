@@ -28,9 +28,11 @@ class Vendor < Recordable
   end
 
   def vendor_keys
-    self.vendor_users.map do |vu|
-      self.vendor_key_for_vendor_user(vu)
-    end
+    Hash[
+      self.vendor_users.map do |vu|
+        [vu.uuid, self.vendor_key_for_vendor_user(vu)]
+      end
+    ]
   end
 
   def stored_responses

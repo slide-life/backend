@@ -17,6 +17,12 @@ module VendorRoutes
       vendor.to_json
     end
 
+    app.get '/vendors/:id/vendor_keys' do
+      vendor = Vendor.find(params[:id])
+
+      { vendor_keys: vendor.vendor_keys }.to_json
+    end
+
     app.get '/vendors/:id/public_key' do
       vendor = Vendor.find(params[:id])
 
