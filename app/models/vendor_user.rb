@@ -8,8 +8,6 @@ class VendorUser < Recordable
 
   validates_presence_of :uuid, on: :create
 
-  before_validation :initialize_uuid
-
   def vendor_profile
     self.vendor.profile_for(self.uuid)
   end
@@ -18,8 +16,7 @@ class VendorUser < Recordable
     self.vendor.latest_profile_for(self.uuid)
   end
 
-  protected
-  def initialize_uuid
-    self.uuid = (0...32).map{65.+(rand(25)).chr}.join
+  def vendor_forms
+    self.vendor.vendor_forms
   end
 end
