@@ -3,7 +3,7 @@ require 'sinatra/cross_origin'
 configure do
   enable :cross_origin
   set :allow_origin, :any
-  set :allow_methods, [:get, :post, :options, :put]
+  set :allow_methods, [:get, :post, :options, :put, :patch]
 end
 
 options '*' do

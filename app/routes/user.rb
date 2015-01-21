@@ -6,6 +6,7 @@ module UserRoutes
       user = User.create!(number: @request_payload['user'],
                           public_key: @request_payload['public_key'],
                           key: @request_payload['key'])
+      # NB. iOS app needs device integration
       user.to_json
     end
 
