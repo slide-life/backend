@@ -8,7 +8,7 @@ class User < Recordable
   validates_presence_of :number
 
   def encrypted_vendor_users
-    self.profile['_vendor_users']
+    self.profile['_vendor_users'] || []
   end
 end
 
