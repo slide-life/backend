@@ -18,7 +18,7 @@ module VendorFormRoutes
         form_fields: @request_payload['form_fields']
       vendor_form.save!
 
-      vendor_form.to_json methods: [:public_key]
+      vendor_form.to_json methods: [:public_key, :vendor_keys]
     end
 
     app.get '/vendors/:id/vendor_forms/:form_id' do

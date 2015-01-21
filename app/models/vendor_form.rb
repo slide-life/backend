@@ -14,6 +14,10 @@ class VendorForm < Observable
 
   after_create :add_patch_callbacks
 
+  def vendor_keys
+    self.vendor.vendor_keys
+  end
+
   def responses
     self.vendor.get_responses(self)
   end

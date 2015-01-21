@@ -23,6 +23,16 @@ class Vendor < Recordable
     self.checksum == chk
   end
 
+  def vendor_key_for_vendor_user(vendor_user)
+    (self.profile['_vendor_keys'] || {})[vendor_user.uuid]
+  end
+
+  def vendor_keys
+    self.vendor_users.map do |vu|
+      self.vendor_key_for_vendor_user(vu)
+    end
+  end
+
   def stored_responses
     self.profile['_responses'] || {}
   end
