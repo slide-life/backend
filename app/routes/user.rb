@@ -4,6 +4,7 @@ module UserRoutes
   def self.registered(app)
     app.post '/users' do
       user = User.create!(number: @request_payload['user'],
+                          private_key: @request_payload['private_key'],
                           public_key: @request_payload['public_key'],
                           key: @request_payload['key'])
       # NB. iOS app needs device integration
@@ -26,6 +27,11 @@ module UserRoutes
     app.get '/users/:number/exists' do
       user = User.find_by(number: params[:number])
       { status: !(user.nil?) }.to_json
+    end
+
+    app.get '/users/:number/keys' do
+      user = User.find_by(number: params[:number])
+      { number: user.number, private_key: user.private_key, public_key: user.public_key, key: user.key }.to_json
     end
 
     app.get '/users/:number/public_key' do

@@ -3,6 +3,7 @@ require_relative 'recordable'
 
 class User < Recordable
   field :number, type: String
+  field :private_key, type: String
   has_many :relationships
 
   validates_presence_of :number
