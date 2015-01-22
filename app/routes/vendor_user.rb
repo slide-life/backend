@@ -12,7 +12,7 @@ module VendorUserRoutes
       })
       vendor_user.uuid = (0...32).map{65.+(rand(25)).chr}.join
       vendor_user.save!
-      vendor.patch_key!(vendor_user, vendor_user.key, @request_payload['vendor_key'])
+      vendor.patch_key!(vendor_user, @request_payload['vendor_key'])
 
       vendor_user.to_json
     end
