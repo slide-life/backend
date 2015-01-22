@@ -9,6 +9,8 @@ class Conversation
   belongs_to :downstream, polymorphic: true 
 
   validates_presence_of :key
+  validates_presence_of :downstream
+  validates_presence_of :upstream
   validates_associated :upstream
   validates_associated :downstream
 

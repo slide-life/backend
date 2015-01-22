@@ -11,7 +11,6 @@ ROUTES = [
   :conversation,
   :device,
   :endpoint,
-  :relationship,
   :vendor,
   :vendor_form,
   :vendor_user,
@@ -47,9 +46,9 @@ module Sinatra
       body = request.body.read
       request.body.rewind
       begin
-        @request_payload = JSON.parse body unless body == nil or body.length == 0
+        @request_payload = ::JSON.parse body unless body == nil or body.length == 0
         @request_payload ||= {}
-      rescue JSON::ParserError
+      rescue ::JSON::ParserError
         halt_with_error 400, 'Malformed JSON.'
       end
     end

@@ -2,3 +2,4 @@
 .idea
 log/
 /env.rb
+node_modules

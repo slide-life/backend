@@ -12,6 +12,10 @@ class Recordable < Securable
     save!
   end
 
+  def check_checksum(chk)
+    self.checksum == chk
+  end
+
   protected
   def add_patch_listener
     patch_listener = Proc.new do |payload|
