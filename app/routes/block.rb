@@ -122,11 +122,11 @@ end
 module BlockRoutes
   def self.registered(app)
     app.get '/blocks' do
-      organization = @request_payload['organization'] || DEFAULT_ORGANIZATION
+      organization = params[:organization] || DEFAULT_ORGANIZATION
       blocks = Block.find_by(organization: organization)
       halt_with_error 404, 'Organisation not found' if blocks.nil?
 
-      halt_with_error 422, 'Invalid schema' unless validate_schema(blocks.schema)
+      # halt_with_error 422, 'Invalid schema' unless validate_schema(blocks.schema)
 
       blocks.to_json
     end
