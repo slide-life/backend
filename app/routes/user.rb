@@ -3,6 +3,10 @@ require_relative '../models/user'
 module UserRoutes
   def self.registered(app)
     app.post '/users' do
+      ['user', 'public_key', 'key'].each do |field|
+        halt_with_error 422, "#{field} not present." unless @request_payload[field]
+      end
+
       user = User.create!(number: @request_payload['user'],
                           public_key: @request_payload['public_key'],
                           key: @request_payload['key'])
@@ -16,6 +20,8 @@ module UserRoutes
       end
 
       patch '/profile' do
+        halt_with_error 422, 'No patch' unless @request_payload['patch']
+
         @user.patch! @request_payload['patch']
         @user.to_json
       end

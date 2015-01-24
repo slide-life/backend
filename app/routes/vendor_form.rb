@@ -14,6 +14,10 @@ module VendorFormRoutes
       end
 
       post '/vendor_forms' do
+        ['name', 'description', 'form_fields'].each do |field|
+          halt_with_error 422, "#{field} not present." unless @request_payload[field]
+        end
+
         vendor_form = @vendor.vendor_forms.build name: @request_payload['name'],
           description: @request_payload['description'],
           form_fields: @request_payload['form_fields']

@@ -5,6 +5,7 @@ require_relative '../models/actor.rb'
 module ActorRoutes
   def self.registered(app)
     app.post '/actors' do
+      halt_with_error 400, 'Needs a key.' unless @request_payload['key']
       actor = Actor.new(key: @request_payload['key'])
       actor.save!
       actor.to_json

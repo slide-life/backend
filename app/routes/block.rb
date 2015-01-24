@@ -124,7 +124,7 @@ module BlockRoutes
     app.get '/blocks' do
       organization = @request_payload['organization'] || DEFAULT_ORGANIZATION
       blocks = Block.find_by(organization: organization)
-      halt_with_error 404, 'Organisation not found' if blocks.nil?
+      halt_with_error 404, 'Organization not found' if blocks.nil?
 
       # halt_with_error 422, 'Invalid schema' unless validate_schema(blocks.schema)
 

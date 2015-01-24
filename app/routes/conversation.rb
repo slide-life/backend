@@ -38,7 +38,7 @@ module ConversationRoutes
 
       put do
         @conversation.upstream! @request_payload
-        if @downstream.is_a? User
+        if @downstream.is_a? Recordable
           @downstream.patch! @request_payload['patch']
         end
 
@@ -52,6 +52,8 @@ module ConversationRoutes
 
         post '/request_content' do
           blocks = @request_payload['blocks']
+          halt_with_error 422, 'No blocks.' unless blocks
+
           @conversation.request_content! downstream, blocks
 
           @conversation.serialize
@@ -59,6 +61,8 @@ module ConversationRoutes
 
         post '/deposit_content' do
           fields = @request_payload['fields']
+          halt_with_error 422, 'No blocks.' unless fields
+
           @conversation.deposit_content! downstream, fields
 
           @conversation.serialize

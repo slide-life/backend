@@ -10,6 +10,10 @@ module VendorUserRoutes
 
       post '/vendor_users' do
         #TODO: invite code or some form of authentication
+        ['key', 'public_key', 'checksum'].each do |field|
+          halt_with_error 422, "#{field} not present." unless @request_payload[field]
+        end
+
         vendor_user = @vendor.vendor_users.build ({
           key: @request_payload['key'],
           public_key: @request_payload['public_key'],
@@ -59,6 +63,8 @@ module VendorUserRoutes
       end
 
       patch '/vendor_users/:uuid/profile' do
+        halt_with_error 422, 'No patch.' unless @request_payload['patch']
+
         @vendor_user.patch! @request_payload['patch']
         @vendor_user.to_json
       end

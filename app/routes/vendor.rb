@@ -14,6 +14,10 @@ module VendorRoutes
 
       put do
         halt_with_error 403, 'Invalid invite code.' unless @vendor.check_invite_code(@request_payload['invite_code'])
+        ['key', 'public_key', 'checksum'].each do |field|
+          halt_with_error 422, "#{field} not present." unless @request_payload[field]
+        end
+
         @vendor.update! key: @request_payload['key'],
           public_key: @request_payload['public_key'],
           checksum: @request_payload['checksum']
@@ -30,7 +34,9 @@ module VendorRoutes
         end
 
         patch '/profile' do
-          @vendor.patch! params['patch']
+          halt_with_error 422, 'No patch.' unless @request_payload['patch']
+
+          @vendor.patch! @request_payload['patch']
           @vendor.to_json
         end
 
