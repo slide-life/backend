@@ -17,7 +17,7 @@ module ConversationRoutes
       upstream, downstream =
         ConversationRoutes.get_entity(@request_payload['upstream']),
         ConversationRoutes.get_entity(@request_payload['downstream'])
-      conversation = Conversation.new(key: payload['key'],
+      conversation = Conversation.new(key: @request_payload['key'],
                                       name: @request_payload['name'],
                                       description: @request_payload['description'],
                                       upstream: upstream,
@@ -54,7 +54,7 @@ module ConversationRoutes
           blocks = @request_payload['blocks']
           halt_with_error 422, 'No blocks.' unless blocks
 
-          @conversation.request_content! downstream, blocks
+          @conversation.request_content! @downstream, blocks
 
           @conversation.serialize
         end
@@ -63,7 +63,7 @@ module ConversationRoutes
           fields = @request_payload['fields']
           halt_with_error 422, 'No blocks.' unless fields
 
-          @conversation.deposit_content! downstream, fields
+          @conversation.deposit_content! @downstream, fields
 
           @conversation.serialize
         end
