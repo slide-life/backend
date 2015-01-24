@@ -6,7 +6,6 @@ module VendorFormRoutes
       before do
         @vendor = Vendor.find(params[:id])
         halt_with_error 404, 'Vendor not found.' if @vendor.nil?
-        halt_with_error 403, 'Forbidden checksum.' unless @vendor.check_checksum(params[:checksum])
       end
 
       get '/vendor_forms' do
@@ -14,6 +13,7 @@ module VendorFormRoutes
       end
 
       post '/vendor_forms' do
+        halt_with_error 403, 'Forbidden checksum.' unless @vendor.check_checksum(@request_payload['checksum'])
         ['name', 'description', 'form_fields'].each do |field|
           halt_with_error 422, "#{field} not present." unless @request_payload[field]
         end
@@ -37,6 +37,7 @@ module VendorFormRoutes
         end
 
         delete do
+          halt_with_error 403, 'Forbidden checksum.' unless @vendor.check_checksum(@request_payload['checksum'])
           @vendor_form.delete!
         end
       end

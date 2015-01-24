@@ -71,6 +71,5 @@ class Vendor < Recordable
   protected
   def initialize_invite_code
     self.invite_code = (0...16).map{65.+(rand(25)).chr}.join
-    puts "invite code initialized: #{self.invite_code}"
   end
 end

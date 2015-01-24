@@ -38,16 +38,19 @@ module Sinatra
     end
 
     def halt_with_error(status, message)
+      puts "Error #{status}: #{message}"
+      caller.each { |line| puts line }
       halt status, { error: message }.to_json
     end
 
-    before do
+    before '*' do
       content_type :json
       body = request.body.read
       request.body.rewind
       begin
         @request_payload = ::JSON.parse body unless body == nil or body.length == 0
         @request_payload ||= {}
+        puts "Request payload: #{@request_payload}"
       rescue ::JSON::ParserError
         halt_with_error 400, 'Malformed JSON.'
       end
