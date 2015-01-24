@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+  <head></head>
+  <body>
+    <script>
+      parent.postMessage({status: "ready"}, "*");
+      window.addEventListener("message", function(evt) {
+        var qs = evt.message || evt.data;
+        if( qs.verb == "set" ) {
+          window.localStorage[qs.key] = JSON.stringify(qs.value);
+        } else if( qs.verb == "delete" ) {
+          delete window.localStorage[value];
+        } else {
+          parent.postMessage({
+            channel: qs.channel,
+            value: JSON.parse(window.localStorage[qs.key] || '{}')
+          }, "*");
+        }
+      });
+    </script>
+  </body>
+</html>
+

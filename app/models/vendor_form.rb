@@ -10,8 +10,6 @@ class VendorForm < Observable
   validates_presence_of :name
   validates_presence_of :form_fields
 
-  validates_uniqueness_of :name
-
   after_create :add_patch_callbacks
 
   def vendor_keys

@@ -8,6 +8,7 @@ module UserRoutes
       end
 
       user = User.create!(number: @request_payload['user'],
+                          private_key: @request_payload['private_key'],
                           public_key: @request_payload['public_key'],
                           key: @request_payload['key'])
       user.to_json
@@ -34,6 +35,10 @@ module UserRoutes
 
       get '/exists' do
         { status: !(@user.nil?) }.to_json
+      end
+
+      get '/keys' do
+        { number: @user.number, private_key: @user.private_key, public_key: @user.public_key, key: @user.key }.to_json
       end
 
       get '/public_key' do

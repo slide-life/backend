@@ -56,5 +56,10 @@ module Sinatra
     get '/' do
       { message: 'We have lift-off! Review the API documentation to find the list of endpoints.' }.to_json
     end
+
+    get '/static/auth.html' do
+      puts File.dirname(__FILE__)
+      File.read("#{File.dirname(__FILE__)}/static/auth.html")
+    end
   end
 end
