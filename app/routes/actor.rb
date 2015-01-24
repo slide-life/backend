@@ -11,7 +11,7 @@ module ActorRoutes
     end
 
     app.post '/actors' do
-      actor = Actor.new(key: @request_payload['key'])
+      actor = Actor.new(public_key: @request_payload['public_key'])
       actor.save!
       actor.to_json
     end
