@@ -17,7 +17,7 @@ class VendorForm < Observable
   end
 
   def responses
-    self.vendor.get_responses(self)
+    self.vendor.get_responses(self) || []
   end
 
   def public_key

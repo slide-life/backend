@@ -14,7 +14,7 @@ module VendorFormRoutes
 
       post '/vendor_forms' do
         halt_with_error 403, 'Forbidden checksum.' unless @vendor.check_checksum(@request_payload['checksum'])
-        ['name', 'description', 'form_fields'].each do |field|
+        ['name', 'form_fields'].each do |field|
           halt_with_error 422, "#{field} not present." unless @request_payload[field]
         end
 
