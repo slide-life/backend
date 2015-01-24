@@ -43,6 +43,10 @@ module Sinatra
       halt status, { error: message }.to_json
     end
 
+    not_found do
+      halt_with_error 404, 'Not found'
+    end
+
     before '*' do
       content_type :json
       body = request.body.read
