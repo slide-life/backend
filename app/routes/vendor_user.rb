@@ -6,7 +6,8 @@ module VendorUserRoutes
       before do
         @vendor_user = VendorUser.find_by(uuid: params[:uuid])
         halt_with_error 404, 'Vendor user not found' if @vendor_user.nil?
-        halt_with_error 403, 'Invalid checksum.' unless @vendor_user.check_checksum(@request_payload['checksum'])
+        puts "Checksum: #{params['checksum']} == #{@vendor_user.checksum}"
+        halt_with_error 403, 'Invalid checksum.' unless @vendor_user.check_checksum(params['checksum'])
       end
 
       get do

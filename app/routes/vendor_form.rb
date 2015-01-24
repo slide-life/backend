@@ -36,6 +36,18 @@ module VendorFormRoutes
           @vendor_form.to_json methods: [:responses, :public_key]
         end
 
+        get '/listen' do
+          halt_with_error 422, 'No websocket.' unless request.websocket?
+          request.websocket do |ws|
+            ws.onopen do
+              endpoint = @vendor_form.listen(ws)
+              ws.onclose do
+                @vendor_form.unlisten endpoint
+              end
+            end
+          end
+        end
+
         delete do
           halt_with_error 403, 'Forbidden checksum.' unless @vendor.check_checksum(@request_payload['checksum'])
           @vendor_form.delete!

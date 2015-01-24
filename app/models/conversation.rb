@@ -5,8 +5,8 @@ class Conversation
   field :downstreams, type: Array, default: []
   field :name, type: String
   field :description, type: String
-  belongs_to :upstream, polymorphic: true 
-  belongs_to :downstream, polymorphic: true 
+  belongs_to :upstream, polymorphic: true
+  belongs_to :downstream, polymorphic: true
 
   validates_presence_of :key
   validates_presence_of :downstream
@@ -17,7 +17,7 @@ class Conversation
   def upstream!(payload)
     self.upstreams << payload
     save!
-    upstream.stream(payload)
+    upstream.notify(:verb_post, payload)
     to_json
   end
 
