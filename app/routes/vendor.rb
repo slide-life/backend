@@ -27,7 +27,7 @@ module VendorRoutes
       end
 
       patch '/profile' do
-        halt_with_error 403, 'Invalid checksum.' unless @vendor.check_checksum(@request_payload['checksum'])
+        #halt_with_error 403, 'Invalid checksum.' unless @vendor.check_checksum(@request_payload['checksum'])
         halt_with_error 422, 'No patch.' unless @request_payload['patch']
 
         @vendor.patch! @request_payload['patch']
