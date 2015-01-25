@@ -14,6 +14,10 @@ module UserRoutes
       user.to_json
     end
 
+    app.get '/users/:number' do
+      User.find_by(number: params[:number]).to_json
+    end
+
     app.namespace '/users/:number' do
       before do
         @user = User.find_by(number: params[:number])
@@ -58,9 +62,9 @@ module UserRoutes
 
         request.websocket do |ws|
           ws.onopen do
-            endpoint = user.listen(ws)
+            endpoint = @user.listen(ws)
             ws.onclose do
-              user.unlisten endpoint
+              @user.unlisten endpoint
             end
           end
         end
