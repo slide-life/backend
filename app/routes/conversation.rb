@@ -7,6 +7,8 @@ module ConversationRoutes
       User.find_by(number: entity['number'])
     elsif entity['type'] == 'actor'
       Actor.find(BSON::ObjectId.from_string(entity['id']))
+    elsif entity['type'] == 'vendor_user'
+      VendorUser.find_by(uuid: entity['uuid'])
     else
       VendorForm.find(BSON::ObjectId.from_string(entity['id']))
     end
