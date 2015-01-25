@@ -39,7 +39,7 @@ module VendorRoutes
       end
 
       get '/vendor_users' do
-        halt_with_error 403, 'Invalid checksum.' unless @vendor.check_checksum(params['checksum'])
+        #halt_with_error 403, 'Invalid checksum.' unless @vendor.check_checksum(params['checksum'])
         @vendor.vendor_users.to_json
       end
 
