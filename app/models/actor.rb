@@ -1,6 +1,9 @@
 require 'mongoid'
-require_relative 'securable'
 
-class Actor < Securable
+class Actor
+  include Mongoid::Document
+
+  field :key
+
+  validates_presence_of :key
 end
-

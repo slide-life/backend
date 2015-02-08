@@ -1,13 +1,15 @@
 require 'bson'
 
-require_relative '../models/actor.rb'
+require_relative '../models/actor'
 
 module ActorRoutes
   def self.registered(app)
     app.post '/actors' do
-      halt_with_error 422, 'Needs a key.' unless @request_payload['public_key']
+      key = @request_payload['key']
 
-      actor = Actor.new(public_key: @request_payload['public_key'])
+      halt_with_error 422, 'Requires a public key.' unless key
+
+      actor = Actor.new(key: key)
       actor.save!
       actor.to_json
     end
@@ -18,18 +20,13 @@ module ActorRoutes
         halt_with_error 404, 'Actor not found.' if @actor.nil?
       end
 
-      get '/listen' do
-        halt_with_error 422, 'No websocket.' unless request.websocket?
-        request.websocket do |ws|
-          ws.onopen do
-            endpoint = @actor.listen(ws)
-            ws.onclose do
-              @actor.unlisten endpoint
-            end
-          end
-        end
+      get '' do
+        @actor.to_json
+      end
+
+      get '/relationships' do
+        Relationship.or({ left: @actor}, {right: @actor }).to_json
       end
     end
   end
 end
-

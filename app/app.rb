@@ -1,25 +1,14 @@
 require 'sinatra'
+require 'sinatra/namespace'
 require 'sinatra-websocket'
 require 'json'
 require 'logger'
 
 ROUTES = [
-  :admin,
-  :user,
-  :block,
   :actor,
-  :conversation,
-  :device,
-  :endpoint,
-  :vendor,
-  :vendor_form,
-  :vendor_user,
-  :vendor_user_list
+  :user,
+  :relationship
 ]
-
-ROUTES.each do |model_name|
-  require_relative "routes/#{model_name.to_s}"
-end
 
 # Initializers
 require_relative 'initializers/json'
@@ -28,13 +17,9 @@ require_relative 'initializers/resque'
 
 module Sinatra
   class App < Sinatra::Application
-    def self.register_model(model)
-      constant_name = model.to_s.camelize
-      register(const_get(constant_name + "Routes"))
-    end
-
-    ROUTES.each do |model_name|
-      register_model(model_name)
+    ROUTES.each do |route|
+      require_relative "routes/#{route.to_s}"
+      register(const_get("#{route.to_s.camelize}Routes"))
     end
 
     def halt_with_error(status, message)
@@ -54,7 +39,6 @@ module Sinatra
       begin
         @request_payload = ::JSON.parse body unless body == nil or body.length == 0
         @request_payload ||= {}
-        puts "Request payload: #{@request_payload}"
       rescue ::JSON::ParserError
         halt_with_error 400, 'Malformed JSON.'
       end
@@ -65,7 +49,6 @@ module Sinatra
     end
 
     get '/static/auth.html' do
-      puts File.dirname(__FILE__)
       File.read("#{File.dirname(__FILE__)}/static/auth.html")
     end
   end

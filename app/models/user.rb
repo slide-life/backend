@@ -1,14 +1,27 @@
 require 'mongoid'
-require_relative 'recordable'
+require 'bcrypt'
 
-class User < Recordable
-  field :number, type: String
-  field :private_key, type: String
+require_relative 'actor'
+require_relative 'identifier'
 
-  validates_presence_of :number
+class User < Actor
+  field :password, type: String
 
-  def encrypted_vendor_users
-    self.profile['_vendor_users'] || []
+  has_many :identifiers
+  # has profile.private
+  # has_many :devices
+
+  def initializePassword(password)
+    self.password = BCrypt::Password.create(password)
+  end
+
+  def addIdentifier(value, type)
+    if not IDENTIFIER_TYPES.include? type
+      raise 'Invalid type'
+    elsif Identifier.where(value: value, type: type).exists?
+      raise 'Identifier has already been claimed'
+    else
+      self.identifiers << Identifier.new(value: value, type: type)
+    end
   end
 end
-

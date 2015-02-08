@@ -6,7 +6,6 @@ class Device
   field :registration_id
   enum :device_type, [:android, :ios]
   belongs_to :user
-  belongs_to :endpoint
 
   validates_presence_of :registration_id
   validates_presence_of :device_type

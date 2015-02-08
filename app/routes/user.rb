@@ -1,75 +1,54 @@
+require 'json'
+
 require_relative '../models/user'
+require_relative '../models/identifier'
+require_relative '../models/relationship'
 
 module UserRoutes
   def self.registered(app)
     app.post '/users' do
-      ['user', 'public_key', 'key'].each do |field|
-        halt_with_error 422, "#{field} not present." unless @request_payload[field]
+      key        = @request_payload['key']
+      password   = @request_payload['password']
+      identifier = @request_payload['identifier']
+
+      halt_with_error 422, 'Requires a public key.' unless key
+      halt_with_error 422, 'Requires a password.' unless password
+      halt_with_error 422, 'Requires an identifier.' unless identifier and identifier['value'] and identifier['type']
+
+      user = User.new(key: key)
+      user.initializePassword(password)
+
+      begin
+        user.addIdentifier(identifier['value'], identifier['type'].to_sym)
+      rescue Exception => e
+        halt_with_error 422, e.message
       end
 
-      user = User.create!(number: @request_payload['user'],
-                          private_key: @request_payload['private_key'],
-                          public_key: @request_payload['public_key'],
-                          key: @request_payload['key'])
+      user.save!
       user.to_json
     end
 
-    app.get '/users/:number' do
-      User.find_by(number: params[:number]).to_json
+    app.get '/users' do
+      halt_with_error 422, 'Requires an identifier.' unless params[:identifier]
+      halt_with_error 422, 'Requires an identifier type.' unless params[:identifier_type]
+
+      identifier = Identifier.find_by(identifier: params[:identifier], type: params[:identifier_type])
+      if identifier then identifier.user.to_json else not_found end
     end
 
-    app.namespace '/users/:number' do
+    app.namespace '/users/:id' do
       before do
-        @user = User.find_by(number: params[:number])
-        halt_with_error 404, 'User not found.' if @user.nil?
+        @user = User.find(params[:id])
+        halt_with_error 404, 'Actor not found.' if @user.nil?
       end
 
-      patch '/profile' do
-        halt_with_error 422, 'No patch' unless @request_payload['patch']
-
-        @user.patch! @request_payload['patch']
+      get '' do
         @user.to_json
       end
 
-      put '/devices' do
-        @user.add_device(registration_id: @request_payload['registration_id'],
-                        device_type: @request_payload['type'])
-        @user.to_json
-      end
-
-      get '/exists' do
-        { status: !(@user.nil?) }.to_json
-      end
-
-      get '/keys' do
-        { number: @user.number, private_key: @user.private_key, public_key: @user.public_key, key: @user.key }.to_json
-      end
-
-      get '/public_key' do
-        { number: @user.number, public_key: @user.public_key }.to_json
-      end
-
-      get '/profile' do
-        @user.profile.to_json
-      end
-
-      get '/vendor_users' do
-        @user.encrypted_vendor_users.to_json
-      end
-
-      get '/listen' do
-        halt_with_error 422, 'No websocket.' unless request.websocket?
-
-        request.websocket do |ws|
-          ws.onopen do
-            endpoint = @user.listen(ws)
-            ws.onclose do
-              @user.unlisten endpoint
-            end
-          end
-        end
+      get '/relationships' do
+        Relationship.or({ left: @user}, {right: @user }).to_json
       end
     end
   end
 end
-
