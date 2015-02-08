@@ -1,5 +1,3 @@
-require 'bson'
-
 require_relative '../models/actor'
 
 module ActorRoutes

@@ -1,7 +1,5 @@
 require 'mongoid'
 
-require_relative 'actor'
-
 class Vendor < Actor
   field :name, type: String
   field :domain, type: String

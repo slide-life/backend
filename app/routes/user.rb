@@ -1,5 +1,3 @@
-require 'json'
-
 require_relative '../models/user'
 require_relative '../models/identifier'
 require_relative '../models/relationship'
@@ -16,10 +14,10 @@ module UserRoutes
       halt_with_error 422, 'Requires an identifier.' unless identifier and identifier['value'] and identifier['type']
 
       user = User.new(key: key)
-      user.initializePassword(password)
+      user.initialize_password(password)
 
       begin
-        user.addIdentifier(identifier['value'], identifier['type'].to_sym)
+        user.add_identifier(identifier['value'], identifier['type'].to_sym)
       rescue Exception => e
         halt_with_error 422, e.message
       end
