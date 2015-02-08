@@ -22,6 +22,17 @@ module ActorRoutes
         @actor.to_json
       end
 
+      patch '' do
+        profile = @request_payload['profile']
+        halt_with_error 422, 'Patch requires a profile.' unless profile
+
+        @actor.profile = Profile.new if @actor.profile.nil?
+        @actor.profile.patch(profile)
+
+        @actor.save!
+        @actor.to_json
+      end
+
       get '/relationships' do
         Relationship.or({ left: @actor}, {right: @actor }).to_json
       end

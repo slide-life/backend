@@ -7,7 +7,7 @@ module RelationshipRoutes
   def self.registered(app)
     app.post '/relationships' do
       left  = Actor.find(@request_payload['current_user_temp']) # TODO: user sessions/API keys and current_user.id
-      right = Actor.find(@request_payload['user'])
+      right = Actor.find(@request_payload['actor'])
       key   = @request_payload['key']
 
       halt_with_error 422, 'Requires a left actor.' unless left

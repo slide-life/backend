@@ -17,7 +17,7 @@ module UserRoutes
       user.initialize_password(password)
 
       begin
-        user.add_identifier(identifier['value'], identifier['type'].to_sym)
+        user.add_identifier(identifier['value'], identifier['type'])
       rescue Exception => e
         halt_with_error 422, e.message
       end
@@ -32,21 +32,6 @@ module UserRoutes
 
       identifier = Identifier.find_by(identifier: params[:identifier], type: params[:identifier_type])
       if identifier then identifier.user.to_json else not_found end
-    end
-
-    app.namespace '/users/:id' do
-      before do
-        @user = User.find(params[:id])
-        halt_with_error 404, 'Actor not found.' if @user.nil?
-      end
-
-      get '' do
-        @user.to_json
-      end
-
-      get '/relationships' do
-        Relationship.or({ left: @user}, {right: @user }).to_json
-      end
     end
   end
 end

@@ -7,7 +7,6 @@ class User < Actor
   field :password, type: String
 
   has_many :identifiers
-  # has profile.private
   # has_many :devices
 
   def initialize_password(password)
@@ -15,12 +14,13 @@ class User < Actor
   end
 
   def add_identifier(value, type)
-    if not IDENTIFIER_TYPES.include? type
-      raise 'Invalid type'
-    elsif Identifier.where(value: value, type: type).exists?
-      raise 'Identifier has already been claimed'
-    else
-      self.identifiers << Identifier.new(value: value, type: type)
+    raise 'Invalid type.' if not IDENTIFIER_TYPES.include? type.to_sym
+    raise 'Identifier has already been claimed.' if Identifier.where(value: value, _type: type).exists?
+
+    if type.to_sym == :phone
+      self.identifiers << Phone.new(value: value)
+    else # type.to_sym == :email
+      self.identifiers << Email.new(value: value)
     end
   end
 end

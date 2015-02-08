@@ -10,5 +10,10 @@ class Identifier
 
   field :value, type: String
   field :verified, type: Boolean, default: false
-  enum :type, IDENTIFIER_TYPES
+end
+
+class Phone < Identifier
+end
+
+class Email < Identifier
 end
