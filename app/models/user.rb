@@ -7,7 +7,7 @@ class User < Actor
   field :password, type: String
 
   has_many :identifiers
-  # has_many :devices
+  has_many :devices
 
   def initialize_password(password)
     self.password = BCrypt::Password.create(password)
