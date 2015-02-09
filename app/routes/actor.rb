@@ -36,6 +36,34 @@ module ActorRoutes
       get '/relationships' do
         Relationship.or({ left: @actor}, {right: @actor }).to_json
       end
+
+      get '/listen' do
+        halt_with_error 422, 'No websocket.' unless request.websocket?
+
+        request.websocket do |ws|
+          ws.onopen do
+            listener = @actor.listen!(ws)
+            ws.onclose do
+              @actor.unlisten!(listener)
+            end
+          end
+        end
+      end
+
+      post '/listeners' do
+        type = @request_payload['type']
+
+        case (type)
+          when 'webhook'
+            listener = Webhook.new(url: @request_payload['url'])
+            listener.save!
+
+            @actor.listeners << listener
+            @actor.save!
+        end
+
+        @actor.to_json
+      end
     end
   end
 end

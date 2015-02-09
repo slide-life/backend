@@ -1,4 +1,5 @@
 require 'mongoid'
+require_relative './listener'
 
 class Actor
   include Mongoid::Document
@@ -6,7 +7,30 @@ class Actor
   field :key
   embeds_one :profile
 
+  has_many :listeners
+
   validates_presence_of :key
+
+  def listen!(ws)
+    listener = Websocket.build_socket_listener(ws)
+    self.listeners << listener
+    save!
+
+    listener
+  end
+
+  def unlisten!(listener)
+    self.listeners.delete listener
+    save!
+  end
+
+  def notify(event)
+    self.listeners.select do |listener|
+      listener.scoped_to?(event)
+    end.each do |listener|
+      listener.notify(event)
+    end
+  end
 end
 
 class Profile

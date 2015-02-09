@@ -50,7 +50,12 @@ module UserRoutes
         halt_with_error 422, 'Requires a registration id.' unless registration_id
         halt_with_error 422, 'Requires a device type.' unless type
 
-        @user.devices << Device.new(registration_id: registration_id, type: type)
+        case type
+          when 'android'
+            @user.devices << AndroidDevice.new(registration_id: registration_id)
+          when 'apple'
+            @user.devices << AppleDevice.new(registration_id: registration_id)
+        end
         @user.save!
         @user.to_json
       end

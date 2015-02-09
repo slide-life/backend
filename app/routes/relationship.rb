@@ -57,12 +57,17 @@ module RelationshipRoutes
           right = @relationship.right_id.to_s
           halt_with_error 422, 'Invalid receiver.' unless [left, right].include? to
           target = (left == to) ? :left : :right
+          target_actor = (left == to) ? @relationship.left : @relationship.right
 
           # TODO: validate blocks
           blocks = @request_payload['blocks']
 
           request = Request.new(to: target, blocks: blocks)
-          request.save!
+          @conversation.messages << request
+          @conversation.save!
+
+          target_actor.notify(request.as_event)
+
           request.to_json
         end
 
@@ -78,10 +83,15 @@ module RelationshipRoutes
 
           # TODO: use session authentication to get left/right and authenticate
           target = (request.to == :left) ? :right : :left
+          target_actor = (request.to == :left) ? @relationship.right : @relationship.left
 
           response = Response.new(to: target, data: data)
           response.request = request
-          response.save!
+          @conversation.messages << response
+          @conversation.save!
+
+          target_actor.notify(response.as_event)
+
           response.to_json
         end
       end
