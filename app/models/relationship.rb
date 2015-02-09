@@ -15,9 +15,9 @@ class Relationship
   validates_presence_of :right
 
   def serialize
-    { id: self.id.to_json,
-      left: self.left_id.to_json,
-      right: self.right_id.to_json,
+    { id: self.id.to_s,
+      left: self.left_id.to_s,
+      right: self.right_id.to_s,
       left_key: self.left_key,
       right_key: self.right_key,
       conversations: self.conversations }.to_json

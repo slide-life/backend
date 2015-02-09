@@ -29,6 +29,10 @@ module RelationshipRoutes
         @relationship.serialize
       end
 
+      get '/conversations' do
+        @relationship.conversations.to_json
+      end
+
       post '/conversations' do
         name = @request_payload['name']
         halt_with_error 422, 'Requires a name.' unless name
@@ -78,7 +82,7 @@ module RelationshipRoutes
           # TODO: validate that data corresponds to request
           data = @request_payload['data']
           request.blocks.each do |block|
-            halt_with_error 422, 'Block required: #{block}.' unless data[block]
+            halt_with_error 422, "Block required: #{block}." unless data[block]
           end
 
           # TODO: use session authentication to get left/right and authenticate

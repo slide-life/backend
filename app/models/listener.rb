@@ -10,14 +10,14 @@ class Listener
 
   field :relationship_id, type: String
   field :conversation_id, type: String
-  enum :message_filter, [:request, :response, :deposit]
+  enum :message_filter, [:none, :request, :response, :deposit]
 
   belongs_to :actor
 
   def scoped_to?(event)
     return false if self.relationship_id && event['relationship'].id != self.relationship_id
     return false if self.conversation_id && event['conversation'].id != self.conversation_id
-    return false if self.message_filter && event['message'].message_type != self.message_filter
+    return false if self.message_filter != :none && event['message'].message_type != self.message_filter
     true
   end
 end
