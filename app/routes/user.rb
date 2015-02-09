@@ -31,8 +31,9 @@ module UserRoutes
     app.get '/users' do
       halt_with_error 422, 'Requires an identifier.' unless params[:identifier]
       halt_with_error 422, 'Requires an identifier type.' unless params[:identifier_type]
+      halt_with_error 422, 'Invalid identifier type.' if not IDENTIFIER_TYPES.include? params[:identifier_type].to_sym
 
-      identifier = Identifier.find_by(identifier: params[:identifier], type: params[:identifier_type], verified: true)
+      identifier = Identifier.find_by(value: params[:identifier], _type: _type = params[:identifier_type].capitalize, verified: true)
       if identifier then identifier.user.to_json else not_found end
     end
 
