@@ -1,7 +1,7 @@
 require 'mongoid'
 
 IDENTIFIER_TYPES = [:phone, :email]
-PHONE_VERIFICATION_TIME_LIMIT = 5*24*60*60
+PHONE_VERIFICATION_TIME_LIMIT = 5*60 # 5 minutes
 
 class Identifier
   include Mongoid::Document
@@ -15,7 +15,7 @@ end
 
 class Phone < Identifier
   field :created, type: Time, default: Time.now
-  field :attempts, type: Integer
+  field :attempts, type: Integer, default: 0
 end
 
 class Email < Identifier

@@ -53,15 +53,15 @@ module UserRoutes
         if identifier.is_a? Phone
           halt_with_error 422, 'Verification time limit exceeded' if Time.now - identifier.created > PHONE_VERIFICATION_TIME_LIMIT
           halt_with_error 422, 'Maximum number of attempts to verify phone number exceeded' if identifier.attempts >= 3
-          identifier.attempts++
+          identifier.attempts += 1
 
           if identifier.verification_code == verification_code
             identifier.verified = true
             identifier.save!
             200
           else
-            halt_with_error 422, 'Invalid verification code'
             identifier.save!
+            halt_with_error 422, 'Invalid verification code'
           end
         end
 
