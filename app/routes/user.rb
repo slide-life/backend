@@ -16,9 +16,10 @@ module UserRoutes
 
       user = User.new(key: key)
       user.initialize_password(password)
+      user.save! # N.B. This is required for the identifiers to persist for some reason
 
       begin
-        user.add_identifier(identifier['value'], identifier['type'])
+        user.identifiers << user.build_identifier(identifier['value'], identifier['type'])
       rescue Exception => e
         halt_with_error 422, e.message
       end
@@ -31,14 +32,39 @@ module UserRoutes
       halt_with_error 422, 'Requires an identifier.' unless params[:identifier]
       halt_with_error 422, 'Requires an identifier type.' unless params[:identifier_type]
 
-      identifier = Identifier.find_by(identifier: params[:identifier], type: params[:identifier_type])
+      identifier = Identifier.find_by(identifier: params[:identifier], type: params[:identifier_type], verified: true)
       if identifier then identifier.user.to_json else not_found end
     end
 
-    app.namespace '/users/:id' do
+    app.namespace '/users/:user_id' do
       before do
-        @user = User.find(params[:id])
+        @user = User.find(params[:user_id])
         halt_with_error 404, 'User not found.' if @user.nil?
+      end
+
+      post '/identifiers/:identifier_id/verify' do
+        identifier = Identifier.find(params[:identifier_id])
+        verification_code = @request_payload['verification_code']
+
+        halt_with_error 404, 'Identifier not found.' if identifier.nil?
+        halt_with_error 422, 'Verification code required.' unless verification_code
+
+        if identifier.is_a? Phone
+          halt_with_error 422, 'Verification time limit exceeded' if Time.now - identifier.created > PHONE_VERIFICATION_TIME_LIMIT
+          halt_with_error 422, 'Maximum number of attempts to verify phone number exceeded' if identifier.attempts >= 3
+          identifier.attempts++
+
+          if identifier.verification_code == verification_code
+            identifier.verified = true
+            identifier.save!
+            200
+          else
+            halt_with_error 422, 'Invalid verification code'
+            identifier.save!
+          end
+        end
+
+        # TODO: verify email
       end
 
       post '/devices' do
@@ -56,6 +82,7 @@ module UserRoutes
           when 'apple'
             @user.devices << AppleDevice.new(registration_id: registration_id)
         end
+
         @user.save!
         @user.to_json
       end

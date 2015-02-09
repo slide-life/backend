@@ -1,7 +1,9 @@
 require 'mongoid'
 require 'bcrypt'
+require 'securerandom'
 
 require_relative 'identifier'
+require_relative '../utils/messenger'
 
 class User < Actor
   field :password, type: String
@@ -13,14 +15,27 @@ class User < Actor
     self.password = BCrypt::Password.create(password)
   end
 
-  def add_identifier(value, type)
+  def build_identifier(value, type)
     raise 'Invalid type.' if not IDENTIFIER_TYPES.include? type.to_sym
     raise 'Identifier has already been claimed.' if Identifier.where(value: value, _type: type).exists?
 
     if type.to_sym == :phone
-      self.identifiers << Phone.new(value: value)
+      pin = generate_pin
+      begin
+        Messenger.send_verification_sms(value, pin)
+      rescue Nexmo::Error
+        raise 'Could not verify phone number'
+      else
+        return Phone.new(value: value, verification_code: pin)
+      end
     else # type.to_sym == :email
-      self.identifiers << Email.new(value: value)
+      return Email.new(value: value)
     end
+  end
+
+  private
+
+  def generate_pin
+    10**5 + SecureRandom.random_number(10**5)
   end
 end
