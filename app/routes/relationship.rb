@@ -16,7 +16,7 @@ module RelationshipRoutes
 
       relationship = Relationship.new(left: left, right: right, right_key: key)
       relationship.save!
-      relationship.to_json
+      relationship.serialize
     end
 
     app.namespace '/relationships/:relationship_id' do
@@ -26,7 +26,7 @@ module RelationshipRoutes
       end
 
       get '' do
-        @relationship.to_json
+        @relationship.serialize
       end
 
       post '/conversations' do
