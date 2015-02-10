@@ -34,6 +34,12 @@ class User < Actor
     end
   end
 
+  def as_json(params={})
+    params[:include] ||= :identifiers
+    puts "#{params.inspect} params"
+    super(params)
+  end
+
   private
 
   def generate_pin

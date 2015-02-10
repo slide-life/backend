@@ -43,6 +43,20 @@ module UserRoutes
         halt_with_error 404, 'User not found.' if @user.nil?
       end
 
+      post '/identifiers' do
+        begin
+          halt_with_error 422, 'Requires an identifier.' unless @request_payload['value'] and @request_payload['type']
+
+          identifier = @user.build_identifier(@request_payload['value'], @request_payload['type'])
+          @user.identifiers << identifier
+
+          @user.save!
+          identifier.to_json
+        rescue Exception => e
+          halt_with_error 422, e.message
+        end
+      end
+
       post '/identifiers/:identifier_id/verify' do
         identifier = Identifier.find(params[:identifier_id])
         verification_code = @request_payload['verification_code']
