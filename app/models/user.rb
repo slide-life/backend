@@ -1,6 +1,7 @@
 require 'mongoid'
 require 'bcrypt'
 require 'securerandom'
+require 'twilio-ruby'
 
 require_relative 'identifier'
 require_relative '../utils/messenger'
@@ -23,7 +24,7 @@ class User < Actor
       pin = generate_pin
       begin
         Messenger.send_verification_sms(value, pin)
-      rescue Nexmo::Error
+      rescue Twilio::REST::RequestError
         raise 'Could not verify phone number'
       else
         return Phone.new(value: value, verification_code: pin)

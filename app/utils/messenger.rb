@@ -1,9 +1,9 @@
-require 'nexmo'
+require 'twilio-ruby'
 
 module Messenger
-  @nexmo = Nexmo::Client.new(key: ENV['NEXMO_API_KEY'], secret: ENV['NEXMO_API_SECRET'])
+  @twilio= Twilio::REST::Client.new(ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN'])
 
   def self.send_verification_sms(to, pin)
-    @nexmo.send_2fa_message({ to: to, pin: pin })
+    @twilio.account.messages.create({ from: ENV['TWILIO_PHONE_NUMBER'], to: to, body: "Your slide verification code is #{pin}. It will expire in 5 minutes." })
   end
 end
