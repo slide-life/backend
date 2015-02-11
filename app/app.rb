@@ -7,7 +7,8 @@ require 'logger'
 ROUTES = [
   :actor,
   :user,
-  :relationship
+  :relationship,
+  :vendor
 ]
 
 # Initializers

@@ -34,7 +34,7 @@ module ActorRoutes
       end
 
       get '/relationships' do
-        Relationship.or({ left: @actor}, {right: @actor }).to_json
+        Relationship.or({ left: @actor}, { right: @actor }).to_json
       end
 
       get '/listen' do
