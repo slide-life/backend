@@ -23,6 +23,33 @@ module VendorRoutes
       vendor.save!
       vendor.to_json
     end
+
+    app.namespace '/vendors/:id' do
+      before do
+        @vendor = Vendor.find(params[:id])
+      end
+
+      get '/responses' do
+        query = { users: params[:users], fields: params[:fields] }
+
+        @vendor.responses_for_query(query).to_json
+      end
+
+      get '/forms' do
+        @vendor.forms.to_json
+      end
+
+      post '/forms' do
+        form = @vendor.forms.build(
+          form_fields: @request_payload['form_fields'],
+          name: @request_payload['name'],
+          description: @request_payload['description']
+        )
+        form.save!
+
+        form.to_json
+      end
+    end
   end
 end
 

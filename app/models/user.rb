@@ -36,7 +36,6 @@ class User < Actor
 
   def as_json(params={})
     params[:include] ||= :identifiers
-    puts "#{params.inspect} params"
     super(params)
   end
 
