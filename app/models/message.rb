@@ -51,6 +51,7 @@ end
 
 class Request < Message
   field :blocks, type: Array
+  field :read, type: Boolean, default: false
   has_one :response
 
   def message_type

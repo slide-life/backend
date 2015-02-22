@@ -28,7 +28,7 @@ class Vendor < Actor
         user_id: u._id.to_s,
         key: r.key_for(self),
         data: Message.merge_with_components(
-          fields,
+          nil,
           Message.by_relationship(r).has_fields
         )
       }

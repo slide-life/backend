@@ -82,6 +82,8 @@ module RelationshipRoutes
 
         post '/requests/:request_id' do
           request = Request.find(params[:request_id])
+          request.read = true
+          request.save!
           halt_with_error 404, 'Request not found.' if request.nil?
 
           # TODO: validate that data corresponds to request
