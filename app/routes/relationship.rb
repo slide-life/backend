@@ -8,13 +8,14 @@ module RelationshipRoutes
     app.post '/relationships' do
       left  = Actor.find(@request_payload['current_user_temp']) # TODO: user sessions/API keys and current_user.id
       right = Actor.find(@request_payload['actor'])
-      key   = @request_payload['key']
+      left_key   = @request_payload['current_user_key']
+      right_key   = @request_payload['actor_key']
 
       halt_with_error 422, 'Requires a left actor.' unless left
       halt_with_error 422, 'Requires a right actor.' unless right
-      halt_with_error 422, 'Requires a key.' unless key
+      halt_with_error 422, 'Requires keys for both parties.' unless left_key and right_key
 
-      relationship = Relationship.new(left: left, right: right, right_key: key)
+      relationship = Relationship.new(left: left, right: right, left_key: left_key, right_key: right_key)
       relationship.save!
       relationship.serialize
     end
@@ -54,6 +55,10 @@ module RelationshipRoutes
           @conversation.to_json
         end
 
+        get '/messages' do
+          @conversation.messages.to_json
+        end
+
         post '/requests' do
           # TODO: use session authentication to get left/right and authenticate
           to    = @request_payload['to']
@@ -81,9 +86,9 @@ module RelationshipRoutes
 
           # TODO: validate that data corresponds to request
           data = @request_payload['data']
-          request.blocks.each do |block|
-            halt_with_error 422, "Block required: #{block}." unless data[block]
-          end
+          #request.blocks.each do |block|
+          #  halt_with_error 422, "Block required: #{block}." unless data[block]
+          #end
 
           # TODO: use session authentication to get left/right and authenticate
           target = (request.to == :left) ? :right : :left
