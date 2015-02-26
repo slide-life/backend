@@ -2,9 +2,12 @@ require_relative '../models/user'
 require_relative '../models/identifier'
 require_relative '../models/relationship'
 require_relative '../models/device'
+require_relative './_actor_shared'
 
 module UserRoutes
   def self.registered(app)
+    actor_routes(app, User)
+
     app.post '/users' do
       key        = @request_payload['key']
       password   = @request_payload['password']

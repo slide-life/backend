@@ -1,7 +1,10 @@
 require_relative '../models/vendor'
+require_relative './_actor_shared'
 
 module VendorRoutes
   def self.registered(app)
+    actor_routes(app, Vendor)
+
     app.get '/vendors' do
       halt_with_error 422, 'Requires a domain.' unless params[:domain]
       vendor = Vendor.find_by(domain: params[:domain])
