@@ -2,6 +2,8 @@ require 'mongoid'
 require 'net/http'
 require 'uri'
 
+require_relative '../middlewares/camelize/camelize/key_map'
+
 LISTENER_TYPES = [:webhook, :websocket, :device]
 
 class Listener
@@ -20,6 +22,27 @@ class Listener
     return false if self.message_filter != :none && event['message'].message_type != self.message_filter
     true
   end
+
+  def render_event(event)
+    event_hash = event.as_json
+    camelized = Rack::Camelize::KeyMap.fmap(-> (x) {
+      case x
+        when String
+          x.camelize(:lower)
+        when Symbol
+          x.to_s.camelize(:lower)
+        else
+          x
+      end
+    }, event_hash)
+    camelized = Rack::Camelize::KeyMap.map_values(-> (x) { x.to_s }, camelized)
+    camelized.to_json
+  end
+
+  def notify(event)
+    data_to_send = render_event(event)
+    send_data(data_to_send)
+  end
 end
 
 class Webhook < Listener
@@ -31,7 +54,7 @@ class Webhook < Listener
   validates_presence_of :url
   validates_presence_of :method
 
-  def notify(event)
+  def send_data(data)
     uri = URI.parse(self.url)
     request_kinds = {
       post: Net::HTTP::Post,
@@ -39,7 +62,7 @@ class Webhook < Listener
       patch: Net::HTTP::Patch
     }
     request = request_kinds[self.method].new(uri.request_uri)
-    request.body = event.to_json
+    request.body = data
     request["Content-Type"] = "application/json"
     http = Net::HTTP.new(uri.host, uri.port)
     response = http.request(request)
@@ -59,8 +82,8 @@ class Websocket < Listener
     @@Sockets[self._id] = ws
   end
 
-  def notify(event)
+  def send_data(data)
     socket = @@Sockets[self._id]
-    socket.send(event.to_json)
+    socket.send(data)
   end
 end

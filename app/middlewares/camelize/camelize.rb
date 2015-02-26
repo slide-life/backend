@@ -38,12 +38,12 @@ module Rack
     end
 
     def to_snake(input)
-      conversion = -> (x) { x.is_a?(String) ? x.underscore : x }
+      conversion = -> (x) { (x.is_a?(String) && !(x.include? ':')) ? x.underscore : x }
       Oj.dump(Rack::Camelize::KeyMap.fmap(conversion, Oj.load(input)))
     end
 
     def to_camel(output)
-      conversion = -> (x) { x.is_a?(String) ? x.camelize(:lower) : x }
+      conversion = -> (x) { (x.is_a?(String) && !(x.include? ':')) ? x.camelize(:lower) : x }
       Oj.dump(Rack::Camelize::KeyMap.fmap(conversion, Oj.load(output)))
     end
   end

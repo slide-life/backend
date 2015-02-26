@@ -11,6 +11,17 @@ module Rack
             data
         end
       end
+
+      def self.map_values(function, data)
+        case data
+          when Hash
+            Hash[data.map { |k, v| [k, map_values(function, v)] }]
+          when Array
+            data.map { |x| map_values(function, x) }
+          else
+            function.call(data)
+        end
+      end
     end
   end
 end
