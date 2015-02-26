@@ -51,6 +51,7 @@ GEM
       optionable (~> 0.2.0)
     multi_json (1.10.1)
     multi_xml (0.5.5)
+    oj (2.11.5)
     optionable (0.2.0)
     origin (2.1.1)
     rack (1.6.0)
@@ -108,6 +109,7 @@ DEPENDENCIES
   json
   mongoid
   mongoid-enum
+  oj
   resque
   sinatra
   sinatra-contrib

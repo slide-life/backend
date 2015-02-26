@@ -33,6 +33,11 @@ module Sinatra
       halt_with_error 404, 'Not found'
     end
 
+    set :method do |method|
+      method = method.to_s.upcase
+      condition { request.request_method == method }
+    end
+
     before '*' do
       content_type :json
       body = request.body.read
@@ -42,6 +47,12 @@ module Sinatra
         @request_payload ||= {}
       rescue ::JSON::ParserError
         halt_with_error 400, 'Malformed JSON.'
+      end
+    end
+
+    before method: :get do
+      params.keys.select { |key| key.is_a? String }.each do |key|
+        params[key.underscore] = params[key]
       end
     end
 
