@@ -28,6 +28,16 @@ def actor_routes(app, model_klass)
       Relationship.of_actor(@actor).to_json
     end
 
+    get '/relationships/with/:other_id' do
+      other_actor = Actor.find(params[:other_id])
+      halt_with_error 400, 'Other actor couldn\'t be found.' unless other_actor
+
+      relationship = Relationship.between(@actor, other_actor)
+      halt_with_error 400, 'Relationship with other actor couldn\'t be found.' unless relationship.count > 0
+
+      relationship.first.to_json
+    end
+
     get '/listen' do
       halt_with_error 422, 'No websocket.' unless request.websocket?
 
