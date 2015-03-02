@@ -20,7 +20,7 @@ module Rack
     private
 
     def process_as_snake(env)
-      if env['CONTENT_TYPE'] == 'application/json'
+      if env['CONTENT_TYPE'] =~ /application\/json/
         input = env['rack.input'].read
         env['rack.input'] = StringIO.new(to_snake(input))
       end
@@ -43,7 +43,17 @@ module Rack
     end
 
     def to_camel(output)
-      conversion = -> (x) { (x.is_a?(String) && !(x.include? ':')) ? x.camelize(:lower) : x }
+      conversion = -> (x) {
+        if (x.is_a?(String) && !(x.include? ':'))
+          if (x[0] == '_')
+            '_' + x[1..-1].camelize(:lower)
+          else
+            x.camelize(:lower)
+          end
+        else
+          x
+        end
+      }
       Oj.dump(Rack::Camelize::KeyMap.fmap(conversion, Oj.load(output)))
     end
   end

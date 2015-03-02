@@ -33,9 +33,12 @@ def actor_routes(app, model_klass)
       halt_with_error 400, 'Other actor couldn\'t be found.' unless other_actor
 
       relationship = Relationship.between(@actor, other_actor)
-      halt_with_error 400, 'Relationship with other actor couldn\'t be found.' unless relationship.count > 0
 
-      relationship.first.to_json
+      if relationship.count > 0
+        { exists: true, relationship: relationship.first }.to_json
+      else
+        { exists: false }.to_json
+      end
     end
 
     get '/listen' do
