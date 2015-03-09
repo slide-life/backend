@@ -44,7 +44,7 @@ module Rack
 
     def to_camel(output)
       conversion = -> (x) {
-        if (x.is_a?(String) && !(x.include? ':'))
+        if (x.is_a?(String) && !((x.include? ':') || (x.include? '/')))
           if (x[0] == '_')
             '_' + x[1..-1].camelize(:lower)
           else

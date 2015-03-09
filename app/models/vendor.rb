@@ -38,7 +38,7 @@ class Vendor < Actor
       fields:
         responses.map do |response|
           response[:data].keys
-        end.inject(:|),
+        end.inject([], :|),
       responses:
         responses
     }
