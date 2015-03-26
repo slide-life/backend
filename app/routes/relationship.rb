@@ -20,6 +20,15 @@ module RelationshipRoutes
       relationship.serialize
     end
 
+    app.get '/relationships' do
+      conversation_id = params[:conversation_id]
+      halt_with_error 422, 'Requires a conversation_id.' unless conversation_id
+
+      conversation = Conversation.find(conversation_id)
+      relationship = conversation.relationship
+      relationship.serialize
+    end
+
     app.namespace '/relationships/:relationship_id' do
       before do
         @relationship = Relationship.find(params[:relationship_id])
